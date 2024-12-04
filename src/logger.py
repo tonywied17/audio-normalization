@@ -26,8 +26,9 @@ class Logger:
         return f"{timestamp} | {level.value} | {message}"
 
     def _write_to_file(self, message: str):
-        """Write the log message to the log file."""
+        """Write the log message to the log file without newlines."""
         try:
+            message = message.replace("\n", " ")
             with open(self.log_file, "a", encoding="utf-8") as f:
                 f.write(message + "\n")
         except OSError as e:
@@ -55,7 +56,7 @@ class Logger:
         formatted_message = self._format_message(level, message)
         
         self._write_to_file(formatted_message)
-        self._print_log_table(level, message)
+        self._print_log_table(level, message) 
 
     def info(self, message: str):
         """Log an info-level message."""
