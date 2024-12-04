@@ -64,7 +64,7 @@ def normalize_audio(video_path, temp_files):
         logger.info("Loudness analysis complete. Proceeding with normalization.")
 
         #! Build filter complex for second pass using loudness metadata
-        logger.info("Building FFmpeg filter complex for normalization.")
+        logger.info(f"Building FFmpeg filter complex for normalization. Metadata: {loudness_metadata}")
         filter_complex = []
         for i, metadata in enumerate(loudness_metadata):
             filter_complex.append(
@@ -102,11 +102,9 @@ def normalize_audio(video_path, temp_files):
             os.remove(final_output_path)
         os.rename(temp_output_path, final_output_path)
 
-        logger.success(f"{video_path} normalized successfully.")
         return final_output_path
 
     except Exception as e:
-        logger.error(f"Error normalizing {video_path}: {e}")
         return None
 
     finally:
@@ -167,8 +165,6 @@ def filter_audio(video_path, volume_boost_percentage, temp_files):
 
         if os.path.exists(temp_output_path):
             os.rename(temp_output_path, video_path)
-            logger.success(f"Volume boost of {volume_boost_percentage}% applied to {video_path}.")
-
         return True
 
     except Exception as e:

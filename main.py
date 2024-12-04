@@ -6,10 +6,9 @@ from rich import box
 from src.manage_tasks import process_file, process_directory
 from src.signal_handler import SignalHandler
 from src.logger import Logger
-import datetime
 
 
-logger = Logger(log_file="app.log")
+logger = Logger(log_file="process.log")
 temp_files = []
 signal_handler = SignalHandler(temp_files)
 console = Console()
