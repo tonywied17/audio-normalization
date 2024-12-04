@@ -40,6 +40,7 @@ class Worker:
             return f"Worker {self.worker_id} - Idle - Status: {self.status}"
 
 
+#! Global worker pool
 max_workers = os.cpu_count()
 workers = [Worker(i + 1, max_workers) for i in range(max_workers)]
 
@@ -71,7 +72,7 @@ def update_worker_table(workers, queue):
     table.add_column("File Path", justify="left", style="dim cyan")
     table.add_column("Status", justify="center", style="bold green")
 
-    # Add rows for workers
+    # workers
     for worker in workers:
         table.add_row(
             str(worker.worker_id),
@@ -82,7 +83,7 @@ def update_worker_table(workers, queue):
 
     table.add_section()
 
-    # Add rows for the queue
+    # queue
     for idx, (task, file_path) in enumerate(queue, 1):
         table.add_row(f"Queue-{idx}", task, file_path, "Waiting for Worker")
 

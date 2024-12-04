@@ -5,12 +5,15 @@ from rich.panel import Panel
 from rich import box
 from src.manage_tasks import process_file, process_directory
 from src.signal_handler import SignalHandler
-from src.utils import log_to_file
+from src.logger import Logger
 import datetime
 
+
+logger = Logger(log_file="app.log")
 temp_files = []
-signal_handler = SignalHandler(temp_files, log_file='app.log')
+signal_handler = SignalHandler(temp_files)
 console = Console()
+
 
 def clean_path(path):
     """
@@ -19,6 +22,7 @@ def clean_path(path):
     if path.startswith('"') and path.endswith('"'):
         path = path[1:-1]
     return path.strip()
+
 
 def main():
     try:
@@ -56,8 +60,8 @@ def main():
                 if not os.path.exists(video_path):
                     console.print("[orange_red1]The specified video path does not exist. Please try again.[/orange_red1]")
                     continue
-                
-                log_to_file("process.log", f"{datetime.datetime.now()} | INFO | Processing video: {video_path}")
+
+                logger.info(f"Processing video: {video_path}")
                 process_file(1, video_path, temp_files=temp_files, is_single_file=True)
 
             elif choice == '2':
@@ -71,7 +75,7 @@ def main():
                     console.print("[orange_red1]The specified directory does not exist. Please try again.[/orange_red1]")
                     continue
 
-                log_to_file("process.log", f"{datetime.datetime.now()} | INFO | Processing directory: {directory}")
+                logger.info(f"Processing directory: {directory}")
                 process_directory(directory, temp_files=temp_files)
 
             elif choice == '3':
@@ -88,8 +92,8 @@ def main():
 
                 try:
                     volume_boost_percentage = float(volume_boost_percentage)
-                    log_to_file("process.log", f"{datetime.datetime.now()} | INFO | Applying {volume_boost_percentage}% volume boost to {video_path}")
-                    process_file(3, video_path, volume_boost_percentage=volume_boost_percentage, temp_files=temp_files)
+                    logger.info(f"Applying {volume_boost_percentage}% volume boost to {video_path}")
+                    process_file(3, video_path, volume_boost_percentage=volume_boost_percentage, temp_files=temp_files, is_single_file=True)
 
                 except ValueError:
                     console.print("[orange_red1]Invalid percentage value. Please enter a valid number.[/orange_red1]")

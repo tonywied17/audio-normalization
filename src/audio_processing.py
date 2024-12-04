@@ -2,13 +2,15 @@ import os
 import re
 import subprocess
 import json
-import datetime
-from src.utils import log_to_file
+from src.logger import Logger
 from rich.console import Console
+from src.constants import NORMALIZATION_PARAMS
 
+logger = Logger(log_file="process.log")
 console = Console()
 
-def clean_and_update_title(original_title, operation, extra_info=""):
+
+def update_audio_track_title(original_title, operation, extra_info=""):
     """
     Clean up existing prefixes/suffixes and update the title.
     """
@@ -19,9 +21,9 @@ def clean_and_update_title(original_title, operation, extra_info=""):
         return f"[molexAudio {operation}] {cleaned_title}".strip()
 
 
-def normalize_audio(video_path, log_file_path, temp_files):
+def normalize_audio(video_path, temp_files):
     """
-    Normalize audio levels for all audio streams in the video
+    Normalize audio levels for all audio streams in the video using a two-pass process.
     """
     file_base, file_ext = os.path.splitext(video_path)
     temp_output_path = f"{file_base}_Normalized_TEMP.mkv"
@@ -29,7 +31,8 @@ def normalize_audio(video_path, log_file_path, temp_files):
     temp_files.append(temp_output_path)
     
     try:
-        # Probe audio streams
+        #! Probe audio streams
+        logger.info(f"Probing audio streams in {video_path}")
         ffprobe_command = [
             "ffprobe", "-i", video_path,
             "-show_streams", "-select_streams", "a", "-loglevel", "quiet", "-print_format", "json"
@@ -40,55 +43,80 @@ def normalize_audio(video_path, log_file_path, temp_files):
         if not audio_streams:
             raise Exception("No audio streams found in the video.")
 
-        # Build FFmpeg filter complex for loudnorm
-        filter_complex = [f"[0:a:{i}]loudnorm=I=-16:TP=-1.5:LRA=11[a{i}]" for i in range(len(audio_streams))]
+        #! First pass to analyze loudness
+        logger.info("Analyzing loudness for audio normalization.")
+        loudness_metadata = []
+        for i in range(len(audio_streams)):
+            first_pass_command = [
+                "ffmpeg", "-i", video_path,
+                "-map", f"0:a:{i}",
+                "-af", f"loudnorm=I={NORMALIZATION_PARAMS['I']}:TP={NORMALIZATION_PARAMS['TP']}:LRA={NORMALIZATION_PARAMS['LRA']}:print_format=json",
+                "-f", "null", "-"
+            ]
+            first_pass_result = subprocess.run(first_pass_command, stderr=subprocess.PIPE, text=True, encoding='utf-8')
+            loudness_match = re.search(r'(\{.*?\})', first_pass_result.stderr, re.DOTALL)
+            if loudness_match:
+                loudness_metadata.append(json.loads(loudness_match.group(1)))
+
+        if len(loudness_metadata) != len(audio_streams):
+            raise Exception("Failed to retrieve loudness metadata for all audio streams.")
+
+        logger.info("Loudness analysis complete. Proceeding with normalization.")
+
+        #! Build filter complex for second pass using loudness metadata
+        logger.info("Building FFmpeg filter complex for normalization.")
+        filter_complex = []
+        for i, metadata in enumerate(loudness_metadata):
+            filter_complex.append(
+                f"[0:a:{i}]loudnorm=I={NORMALIZATION_PARAMS['I']}:TP={NORMALIZATION_PARAMS['TP']}:LRA={NORMALIZATION_PARAMS['LRA']}:" 
+                f"measured_I={metadata['input_i']}:measured_TP={metadata['input_tp']}:measured_LRA={metadata['input_lra']}:" 
+                f"measured_thresh={metadata['input_thresh']}:offset={metadata['target_offset']}[a{i}]"
+            )
 
         ffmpeg_command = [
             "ffmpeg", "-y", "-i", video_path,
             "-filter_complex", "; ".join(filter_complex)
         ]
 
+        #! Map video streams and normalized audio streams
         ffmpeg_command.extend(["-map", "0:v"])
-
-        # Add audio streams with proper titles
         for i, audio_stream in enumerate(audio_streams):
             original_title = audio_stream.get('tags', {}).get('title', f"Track {i + 1}")
-            new_title = clean_and_update_title(original_title, "Normalized")
+            new_title = update_audio_track_title(original_title, "Normalized")
             ffmpeg_command.extend([f"-map", f"[a{i}]", f"-metadata:s:a:{i}", f"title={new_title}"])
 
         ffmpeg_command.extend(["-c:v", "copy", "-c:a", "ac3", "-b:a", "256k", temp_output_path])
 
-        # Execute FFmpeg command
+        #! Execute FFmpeg command for the second pass
+        logger.info(f"Running FFmpeg normalization on {video_path}")
         result = subprocess.run(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8')
         if result.returncode != 0:
             raise Exception(result.stderr)
 
+        #! Replace the original file with the normalized one
         if os.path.exists(video_path) and file_ext.lower() == '.mp4':
             os.remove(video_path)
-            log_to_file(log_file_path, f"{datetime.datetime.now()} | INFO | Deleted original file: {video_path}")
+            logger.info(f"Deleted original file: {video_path}")
 
         if os.path.exists(final_output_path):
             os.remove(final_output_path)
         os.rename(temp_output_path, final_output_path)
 
-        log_to_file(log_file_path, f"{datetime.datetime.now()} | SUCCESS | {video_path} normalized successfully.")
-        console.print(f"\n[medium_spring_green]Processed video:[/medium_spring_green] {video_path} [bright_green](Normalized)[/bright_green]")
-
+        logger.success(f"{video_path} normalized successfully.")
         return final_output_path
 
     except Exception as e:
-        log_to_file(log_file_path, f"{datetime.datetime.now()} | ERROR | {video_path} | {e}")
-        console.print(f"Error processing video: {video_path} | {e}")
+        logger.error(f"Error normalizing {video_path}: {e}")
         return None
 
     finally:
         for temp_file in temp_files:
             if os.path.exists(temp_file):
                 os.remove(temp_file)
-                console.print(f"[red]Removed temp file: {temp_file}[/red]")
-
-
-def filter_audio(video_path, volume_boost_percentage, log_file_path, temp_files):
+                logger.info(f"Removed temp file: {temp_file}")
+                
+                
+def filter_audio(video_path, volume_boost_percentage, temp_files):
     """
     Apply audio filter with volume boost to the video, handling multiple audio tracks.
     """
@@ -98,7 +126,8 @@ def filter_audio(video_path, volume_boost_percentage, log_file_path, temp_files)
     temp_files.append(temp_output_path)
     
     try:
-        # Probe audio streams
+        #! Probe audio streams
+        logger.info(f"Probing audio streams in {video_path} for volume boost.")
         ffprobe_command = [
             "ffprobe",
             "-i", video_path,
@@ -110,35 +139,41 @@ def filter_audio(video_path, volume_boost_percentage, log_file_path, temp_files)
         result = subprocess.run(ffprobe_command, stdout=subprocess.PIPE, text=True, encoding='utf-8')
         audio_streams = json.loads(result.stdout).get("streams", [])
 
-        # Build FFmpeg command
+        if not audio_streams:
+            raise Exception("No audio streams found in the video.")
+
+        #! Build FFmpeg command
+        logger.info(f"Building FFmpeg command to apply volume boost of {volume_boost_percentage}%")
         ffmpeg_command = ["ffmpeg", "-y", "-i", video_path]
         for i, stream in enumerate(audio_streams):
             original_title = stream.get('tags', {}).get('title', f"Track {i + 1}")
-            new_title = clean_and_update_title(original_title, "Boosted", f"{volume_boost_percentage}%")
+            new_title = update_audio_track_title(original_title, "Boosted", f"{volume_boost_percentage}%")
             ffmpeg_command.extend([
                 f"-filter:a:{i}", f"volume={volume_boost}",
                 f"-metadata:s:a:{i}", f"title={new_title}"
             ])
         ffmpeg_command.extend(["-c:v", "copy", "-c:a", "ac3", "-b:a", "256k", temp_output_path])
 
-        # Execute FFmpeg command
+        #! Execute FFmpeg command
+        logger.info(f"Applying volume boost to {video_path}")
         result = subprocess.run(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8')
         if result.returncode != 0:
             raise Exception(result.stderr)
 
+        #! Replace the original file with the boosted one
         if os.path.exists(video_path):
             os.remove(video_path)
+            logger.info(f"Deleted original file: {video_path}")
+
         if os.path.exists(temp_output_path):
             os.rename(temp_output_path, video_path)
-
-        log_to_file(log_file_path, f"{datetime.datetime.now()} | SUCCESS | {video_path} volume boost applied.")
-        console.print(f"\n[medium_spring_green]Processed video:[/medium_spring_green] [bright_green](Volume Boosted {volume_boost_percentage}%)[/bright_green]")
+            logger.success(f"Volume boost of {volume_boost_percentage}% applied to {video_path}.")
 
         return True
 
     except Exception as e:
-        log_to_file(log_file_path, f"{datetime.datetime.now()} | ERROR | {video_path} | {e}")
-        console.print(f"Error processing video: {video_path} | {e}")
+        logger.error(f"Error applying volume boost to {video_path}: {e}")
         if os.path.exists(temp_output_path):
             os.remove(temp_output_path)
+            logger.info(f"Removed temporary file: {temp_output_path}")
         return False
