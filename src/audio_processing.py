@@ -21,7 +21,7 @@ def clean_and_update_title(original_title, operation, extra_info=""):
 
 def normalize_audio(video_path, log_file_path, temp_files):
     """
-    Normalize audio for all tracks and convert to stereo, saving as MKV.
+    Normalize audio levels for all audio streams in the video
     """
     file_base, file_ext = os.path.splitext(video_path)
     temp_output_path = f"{file_base}_Normalized_TEMP.mkv"
