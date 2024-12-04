@@ -65,14 +65,14 @@ def normalize_audio(video_path, log_file_path, temp_files):
 
         if os.path.exists(video_path) and file_ext.lower() == '.mp4':
             os.remove(video_path)
-            console.print(f"[yellow]Deleted original file: {video_path}[/yellow]")
+            log_to_file(log_file_path, f"{datetime.datetime.now()} | INFO | Deleted original file: {video_path}")
 
         if os.path.exists(final_output_path):
             os.remove(final_output_path)
         os.rename(temp_output_path, final_output_path)
 
         log_to_file(log_file_path, f"{datetime.datetime.now()} | SUCCESS | {video_path} normalized successfully.")
-        console.print(f"[medium_spring_green]Processed video:[/medium_spring_green] {video_path} [bright_green](Normalized)[/bright_green]")
+        console.print(f"\n[medium_spring_green]Processed video:[/medium_spring_green] {video_path} [bright_green](Normalized)[/bright_green]")
 
         return final_output_path
 
@@ -132,7 +132,7 @@ def filter_audio(video_path, volume_boost_percentage, log_file_path, temp_files)
             os.rename(temp_output_path, video_path)
 
         log_to_file(log_file_path, f"{datetime.datetime.now()} | SUCCESS | {video_path} volume boost applied.")
-        console.print(f"[medium_spring_green]Processed video:[/medium_spring_green] [bright_green](Volume Boosted {volume_boost_percentage}%)[/bright_green]")
+        console.print(f"\n[medium_spring_green]Processed video:[/medium_spring_green] [bright_green](Volume Boosted {volume_boost_percentage}%)[/bright_green]")
 
         return True
 

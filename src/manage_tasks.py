@@ -9,7 +9,7 @@ from src.worker import workers, max_workers, update_worker_table, print_summary_
 queue = []
 console = Console()
 progress = Progress(SpinnerColumn(), TextColumn("{task.description}"), console=console)
-
+log_file="process.log"
 
 def process_queue():
     """Assign tasks from the queue to idle workers."""
@@ -20,7 +20,7 @@ def process_queue():
             break
     
 
-def process_directory(directory, log_file_path="process.log", temp_files=None):
+def process_directory(directory, temp_files=None):
     """Process all video files in a directory recursively."""
     if temp_files is None:
         temp_files = []
@@ -54,10 +54,10 @@ def process_directory(directory, log_file_path="process.log", temp_files=None):
     results = []
     task = progress.add_task("[cyan]Normalizing Audio...", total=len(video_files))
 
-    with Live(update_worker_table(workers, queue), refresh_per_second=2, console=console) as live:
+    with Live(update_worker_table(workers, queue), refresh_per_second=1, console=console) as live:
         with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
             futures = [
-                executor.submit(process_file, 1, video_path, log_file_path, temp_files, is_single_file=False)
+                executor.submit(process_file, 1, video_path, log_file, temp_files, is_single_file=False)
                 for video_path in video_files
             ]
 
@@ -68,8 +68,6 @@ def process_directory(directory, log_file_path="process.log", temp_files=None):
                     for worker in workers:
                         if worker.is_busy and worker.file_path == video_path:
                             worker.complete_task(process_queue)
-
-                    process_queue() 
 
                     results.append({
                         "file": video_path,
@@ -85,10 +83,11 @@ def process_directory(directory, log_file_path="process.log", temp_files=None):
 
     progress.stop()
 
-    print_summary_table(results)
+    if all(not worker.is_busy for worker in workers):
+        print_summary_table(results)
 
 
-def process_file(option, video_path, volume_boost_percentage=None, log_file_path="process.log", temp_files=None, is_single_file=True):
+def process_file(option, video_path, volume_boost_percentage=None, temp_files=None, is_single_file=True):
     """
     Process a single video file: either normalize or apply a volume boost.
     """
@@ -96,51 +95,44 @@ def process_file(option, video_path, volume_boost_percentage=None, log_file_path
         temp_files = []
 
     task_description = "Normalize Audio" if option == 1 else f"Boost {volume_boost_percentage}% Audio"
-    temp_file = f"{os.path.splitext(video_path)[0]}_TEMP.mkv"
-    temp_files.append(temp_file)
-
     success = False
 
     queue.append((task_description, video_path))
-
     process_queue()
 
     if is_single_file:
         with Live(update_worker_table(workers, queue), refresh_per_second=2, console=console) as live:
             if option == 1:
-                result = normalize_audio(video_path, log_file_path, temp_files)
+                result = normalize_audio(video_path, log_file, temp_files)
                 success = result is not None
 
             elif option == 3 and volume_boost_percentage is not None:
-                result = filter_audio(video_path, volume_boost_percentage, log_file_path, temp_files)
+                result = filter_audio(video_path, volume_boost_percentage, log_file, temp_files)
                 success = result is not None
 
             for worker in workers:
                 if worker.is_busy and worker.file_path == video_path:
                     worker.complete_task(process_queue)
 
-            process_queue()
-
             live.update(update_worker_table(workers, queue))
     else:
         if option == 1:
-            result = normalize_audio(video_path, log_file_path, temp_files)
+            result = normalize_audio(video_path, log_file, temp_files)
             success = result is not None
 
         elif option == 3 and volume_boost_percentage is not None:
-            result = filter_audio(video_path, volume_boost_percentage, log_file_path, temp_files)
+            result = filter_audio(video_path, volume_boost_percentage, log_file, temp_files)
             success = result is not None
 
         for worker in workers:
             if worker.is_busy and worker.file_path == video_path:
                 worker.complete_task(process_queue) 
-
-        process_queue()
-
-    print_summary_table([{
-        "file": video_path,
-        "task": task_description,
-        "status": "Success" if success else "Failed"
-    }])
+                
+    if is_single_file and all(not worker.is_busy for worker in workers):
+        print_summary_table([{
+            "file": video_path,
+            "task": task_description,
+            "status": "Success" if success else "Failed"
+        }])
 
     return task_description, video_path, success

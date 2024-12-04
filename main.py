@@ -1,16 +1,15 @@
 import os
-import logging
 from rich.console import Console
 from rich.table import Table
+from rich.panel import Panel
+from rich import box
 from src.manage_tasks import process_file, process_directory
 from src.signal_handler import SignalHandler
+from src.utils import log_to_file
+import datetime
 
 temp_files = []
-
-logging.basicConfig(level=logging.INFO)
-
 signal_handler = SignalHandler(temp_files, log_file='app.log')
-
 console = Console()
 
 def clean_path(path):
@@ -25,35 +24,44 @@ def main():
     try:
         while True:
             menu_table = Table(
-                box=None,
+                title="🎵 Audio Normalization CLI 🎥",
+                title_style="bold magenta",
+                box=box.SIMPLE,
                 pad_edge=True,
+                show_lines=True,
+                style="cyan",
             )
-            menu_table.add_column("Option", style="bold")
-            menu_table.add_column("Description", style="italic")
+            menu_table.add_column("Option", justify="center", style="bold yellow")
+            menu_table.add_column("Description", justify="left", style="italic green")
 
             menu_table.add_row("1", "Normalize Audio Track for a Video File")
             menu_table.add_row("2", "Normalize Audio Tracks for All Video Files in a Directory")
             menu_table.add_row("3", "Apply Simple Audio Boost to Video File")
-            menu_table.add_row("4", "Exit")
+            menu_table.add_row("4", "[red bold]Exit[/red bold]")
 
-            console.print(menu_table)
+            menu_panel = Panel(
+                menu_table,
+                title="[bold green]Main Menu[/bold green]",
+                border_style="blue",
+                padding=(1, 2),
+            )
+            console.print(menu_panel)
 
-            choice = input("Enter your choice: ").strip()
+            choice = console.input("[bold yellow]Enter your choice:[/bold yellow] ").strip()
 
             if choice == '1':
-                video_path = input("Enter the path to the video file (e.g., E:\\Movies\\video.mkv): ").strip()
+                video_path = console.input("[bold cyan]Enter the path to the video file:[/bold cyan] ").strip()
                 video_path = clean_path(video_path)
 
                 if not os.path.exists(video_path):
                     console.print("[orange_red1]The specified video path does not exist. Please try again.[/orange_red1]")
                     continue
-
-                console.print("\n[green]Processing video for Normalization...[/green]")
-                temp_files.append(f"{os.path.splitext(video_path)[0]}_Normalized_TEMP.mkv")
+                
+                log_to_file("process.log", f"{datetime.datetime.now()} | INFO | Processing video: {video_path}")
                 process_file(1, video_path, temp_files=temp_files, is_single_file=True)
 
             elif choice == '2':
-                directory = input("Enter the path to the directory (or 'exit' to return to the main menu): ").strip()
+                directory = console.input("[bold cyan]Enter the path to the directory:[/bold cyan] ").strip()
                 directory = clean_path(directory)
 
                 if directory.lower() == 'exit':
@@ -61,23 +69,26 @@ def main():
 
                 if not os.path.isdir(directory):
                     console.print("[orange_red1]The specified directory does not exist. Please try again.[/orange_red1]")
+                    continue
 
-                console.print("\n[green]Processing directory...[/green]")
+                log_to_file("process.log", f"{datetime.datetime.now()} | INFO | Processing directory: {directory}")
                 process_directory(directory, temp_files=temp_files)
 
             elif choice == '3':
-                video_path = input("Enter the path to the video file (e.g., E:\\Movies\\video.mkv): ").strip()
+                video_path = console.input("[bold cyan]Enter the path to the video file:[/bold cyan] ").strip()
                 video_path = clean_path(video_path)
 
                 if not os.path.exists(video_path):
                     console.print("[orange_red1]The specified video path does not exist. Please try again.[/orange_red1]")
                     continue
 
-                volume_boost_percentage = input("Enter volume boost percentage (e.g., 10 for 10% increase): ").strip()
+                volume_boost_percentage = console.input(
+                    "[bold cyan]Enter volume boost percentage (e.g., 10 for 10% increase):[/bold cyan] "
+                ).strip()
 
                 try:
                     volume_boost_percentage = float(volume_boost_percentage)
-                    console.print(f"\n[green]Applying {volume_boost_percentage}% volume boost to {video_path}...[/green]")
+                    log_to_file("process.log", f"{datetime.datetime.now()} | INFO | Applying {volume_boost_percentage}% volume boost to {video_path}")
                     process_file(3, video_path, volume_boost_percentage=volume_boost_percentage, temp_files=temp_files)
 
                 except ValueError:

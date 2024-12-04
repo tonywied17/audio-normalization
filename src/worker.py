@@ -1,7 +1,7 @@
 from rich.console import Console
 from rich.table import Table
+from rich import box
 import os
-from rich.live import Live
 
 console = Console()
 
@@ -39,8 +39,10 @@ class Worker:
         else:
             return f"Worker {self.worker_id} - Idle - Status: {self.status}"
 
+
 max_workers = os.cpu_count()
 workers = [Worker(i + 1, max_workers) for i in range(max_workers)]
+
 
 def get_idle_worker():
     """Returns an idle worker from the global worker pool."""
@@ -49,38 +51,69 @@ def get_idle_worker():
             return worker
     return None 
 
-def update_worker_table(workers, queue):
-    """Generate a dynamic Rich table showing the status of workers and the task queue."""
-    table = Table(title="Worker Status", show_header=True, header_style="bold magenta")
-    table.add_column("Worker ID", justify="center")
-    table.add_column("Task", justify="left")
-    table.add_column("File Path", justify="left")
-    table.add_column("Status", justify="center")
-    table.add_column("Queue (Pending Tasks)", justify="left")
 
+def update_worker_table(workers, queue):
+    """
+    Generate a dynamic Rich table showing the status of workers and a formatted queue section.
+    """
+    table = Table(
+        title="🎯 Worker Status",
+        title_style="bold green",
+        show_header=True,
+        header_style="bold cyan",
+        box=box.SIMPLE,
+        show_footer=False,
+        expand=True
+    )
+
+    table.add_column("Worker ID", justify="center", style="bold yellow")
+    table.add_column("Task", justify="left", style="italic magenta")
+    table.add_column("File Path", justify="left", style="dim cyan")
+    table.add_column("Status", justify="center", style="bold green")
+
+    # Add rows for workers
     for worker in workers:
-        queue_display = "\n".join([f"{task} ({file_path})" for task, file_path in queue])
         table.add_row(
             str(worker.worker_id),
-            worker.task_description or "Idle",
-            worker.file_path or "",
-            "Processing" if worker.is_busy else "Idle",
-            queue_display if worker.worker_id == workers[-1].worker_id else ""
+            worker.task_description or "[italic grey]Idle[/italic grey]",
+            worker.file_path or "[italic grey]None[/italic grey]",
+            f"[green]{worker.status}[/green]" if worker.is_busy else "[bold grey]Idle[/bold grey]",
         )
 
+    table.add_section()
+
+    # Add rows for the queue
+    for idx, (task, file_path) in enumerate(queue, 1):
+        table.add_row(f"Queue-{idx}", task, file_path, "Waiting for Worker")
+
+    if all(not worker.is_busy for worker in workers) and not queue:
+        return
+
     return table
+
 
 def print_summary_table(results):
     """
     Generate and print the summary table for all completed tasks.
     """
-    summary_table = Table(title="Task Summary", show_header=True, header_style="bold magenta")
-    summary_table.add_column("File Path", style="dim", width=40)
-    summary_table.add_column("Task", justify="center", width=20)
-    summary_table.add_column("Status", justify="center", width=10)
+    summary_table = Table(
+        title="📋 Task Summary",
+        title_style="bold blue",
+        show_header=True,
+        header_style="bold magenta",
+        box=box.SIMPLE,
+    )
+    summary_table.add_column("File Path", style="dim cyan", width=40)
+    summary_table.add_column("Task", justify="center", style="italic magenta", width=20)
+    summary_table.add_column("Status", justify="center", style="bold green", width=10)
 
     for result in results:
-        summary_table.add_row(result["file"], result["task"], result["status"])
+        summary_table.add_row(
+            result["file"], 
+            result["task"], 
+            f"[green]{result['status']}[/green]" if result["status"] == "Success" else f"[red]{result['status']}[/red]"
+        )
 
     console.clear()
     console.print(summary_table)
+
