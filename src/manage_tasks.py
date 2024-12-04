@@ -3,8 +3,8 @@ import concurrent.futures
 from rich.console import Console
 from rich.live import Live
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from audio_processing import normalize_audio, filter_audio
-from worker import workers, max_workers, update_worker_table, print_summary_table
+from src.audio_processing import normalize_audio, filter_audio
+from src.worker import workers, max_workers, update_worker_table, print_summary_table
 
 queue = []
 console = Console()

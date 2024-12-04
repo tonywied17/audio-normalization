@@ -1,7 +1,7 @@
 import os
 import sys
 import signal
-from utils import log_to_file
+from src.utils import log_to_file
 
 class SignalHandler:
     def __init__(self, temp_files, log_file='app.log'):

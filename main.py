@@ -2,8 +2,8 @@ import os
 import logging
 from rich.console import Console
 from rich.table import Table
-from manage_tasks import process_file, process_directory
-from signal_handler import SignalHandler
+from src.manage_tasks import process_file, process_directory
+from src.signal_handler import SignalHandler
 
 temp_files = []
 

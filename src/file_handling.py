@@ -1,6 +1,6 @@
 import os
 import glob
-from utils import log_to_file
+from src.utils import log_to_file
 
 def is_io_bound(video_path, size_threshold_mb=1024):
     """

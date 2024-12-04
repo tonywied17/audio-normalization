@@ -3,7 +3,7 @@ import re
 import subprocess
 import json
 import datetime
-from utils import log_to_file
+from src.utils import log_to_file
 from rich.console import Console
 
 console = Console()
