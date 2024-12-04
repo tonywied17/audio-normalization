@@ -5,10 +5,7 @@ from rich.panel import Panel
 from rich import box
 from src.manage_tasks import process_file, process_directory
 from src.signal_handler import SignalHandler
-from src.logger import Logger
 
-
-logger = Logger(log_file="process.log")
 temp_files = []
 signal_handler = SignalHandler(temp_files)
 console = Console()
@@ -60,7 +57,6 @@ def main():
                     console.print("[orange_red1]The specified video path does not exist. Please try again.[/orange_red1]")
                     continue
 
-                logger.info(f"Processing video: {video_path}")
                 process_file(1, video_path, temp_files=temp_files, is_single_file=True)
 
             elif choice == '2':
@@ -74,7 +70,6 @@ def main():
                     console.print("[orange_red1]The specified directory does not exist. Please try again.[/orange_red1]")
                     continue
 
-                logger.info(f"Processing directory: {directory}")
                 process_directory(directory, temp_files=temp_files)
 
             elif choice == '3':
@@ -91,7 +86,6 @@ def main():
 
                 try:
                     volume_boost_percentage = float(volume_boost_percentage)
-                    logger.info(f"Applying {volume_boost_percentage}% volume boost to {video_path}")
                     process_file(3, video_path, volume_boost_percentage=volume_boost_percentage, temp_files=temp_files, is_single_file=True)
 
                 except ValueError:

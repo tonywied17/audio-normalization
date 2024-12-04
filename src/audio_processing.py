@@ -32,7 +32,7 @@ def normalize_audio(video_path, temp_files):
     
     try:
         #! Probe audio streams
-        logger.info(f"Probing audio streams in {video_path}")
+        logger.info(f"Probing audio streams.\nFile: {video_path}.")
         ffprobe_command = [
             "ffprobe", "-i", video_path,
             "-show_streams", "-select_streams", "a", "-loglevel", "quiet", "-print_format", "json"
@@ -44,7 +44,7 @@ def normalize_audio(video_path, temp_files):
             raise Exception("No audio streams found in the video.")
 
         #! First pass to analyze loudness
-        logger.info("Analyzing loudness for audio normalization.")
+        logger.info("Analyzing loudness for audio normalization.\nAudio tracks: " + str(len(audio_streams)))
         loudness_metadata = []
         for i in range(len(audio_streams)):
             first_pass_command = [
@@ -96,7 +96,7 @@ def normalize_audio(video_path, temp_files):
         #! Replace the original file with the normalized one
         if os.path.exists(video_path) and file_ext.lower() == '.mp4':
             os.remove(video_path)
-            logger.info(f"Deleted original file: {video_path}")
+            logger.info(f"Replacing original file:\n{video_path}")
 
         if os.path.exists(final_output_path):
             os.remove(final_output_path)
@@ -125,7 +125,7 @@ def filter_audio(video_path, volume_boost_percentage, temp_files):
     
     try:
         #! Probe audio streams
-        logger.info(f"Probing audio streams in {video_path} for volume boost.")
+        logger.info(f"Probing audio streams.\nFile: {video_path}.")
         ffprobe_command = [
             "ffprobe",
             "-i", video_path,
@@ -141,7 +141,7 @@ def filter_audio(video_path, volume_boost_percentage, temp_files):
             raise Exception("No audio streams found in the video.")
 
         #! Build FFmpeg command
-        logger.info(f"Building FFmpeg command to apply volume boost of {volume_boost_percentage}%")
+        logger.info(f"Applying volume adjustment.\n{volume_boost_percentage}% Volume Adjustment\nAudio Tracks: {len(audio_streams)}\nFile: {file_base}{file_ext}.")
         ffmpeg_command = ["ffmpeg", "-y", "-i", video_path]
         for i, stream in enumerate(audio_streams):
             original_title = stream.get('tags', {}).get('title', f"Track {i + 1}")
@@ -153,7 +153,6 @@ def filter_audio(video_path, volume_boost_percentage, temp_files):
         ffmpeg_command.extend(["-c:v", "copy", "-c:a", "ac3", "-b:a", "256k", temp_output_path])
 
         #! Execute FFmpeg command
-        logger.info(f"Applying volume boost to {video_path}")
         result = subprocess.run(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8')
         if result.returncode != 0:
             raise Exception(result.stderr)
@@ -161,15 +160,14 @@ def filter_audio(video_path, volume_boost_percentage, temp_files):
         #! Replace the original file with the boosted one
         if os.path.exists(video_path):
             os.remove(video_path)
-            logger.info(f"Deleted original file: {video_path}")
+            logger.info(f"Replacing original file:\n{video_path}")
 
         if os.path.exists(temp_output_path):
             os.rename(temp_output_path, video_path)
         return True
 
     except Exception as e:
-        logger.error(f"Error applying volume boost to {video_path}: {e}")
         if os.path.exists(temp_output_path):
             os.remove(temp_output_path)
-            logger.info(f"Removed temporary file: {temp_output_path}")
+            logger.info(f"Removed temporary file:\n{temp_output_path}")
         return False

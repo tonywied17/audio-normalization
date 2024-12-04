@@ -14,30 +14,32 @@ class Worker:
         self.file_path = None
         self.status = "Idle"
 
-    def assign_task(self, task_description, file_path):
+    def assign_task(self, task_description, file_path, status="Processing"):
         """Assign a task to the worker if it's not already busy."""
         if not self.is_busy:
             self.is_busy = True
             self.task_description = task_description
             self.file_path = file_path
-            self.status = "Processing"
+            self.status = status
             return True
         return False
 
-    def complete_task(self, process_queue_callback):
+    def complete_task(self, process_queue_callback, live=None):
         """Complete the task and set worker status back to Idle."""
         self.is_busy = False
         self.task_description = None
         self.file_path = None
         self.status = "Idle"
+        
         if process_queue_callback:
-            process_queue_callback()
-
+            process_queue_callback(live)
+            
     def __str__(self):
         if self.is_busy:
             return f"Worker {self.worker_id} - {self.task_description} - {self.file_path} - Status: {self.status}"
         else:
             return f"Worker {self.worker_id} - Idle - Status: {self.status}"
+
 
 
 #! Global worker pool
