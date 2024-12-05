@@ -7,6 +7,7 @@ from src.util.logger import Logger
 from src.util.constants import NORMALIZATION_PARAMS
 
 class AudioProcessor:
+    
     def __init__(self, temp_files=None):
         self.console = Console()
         self.logger = Logger(log_file="process.log")
@@ -71,7 +72,11 @@ class AudioProcessor:
             if len(loudness_metadata) != len(audio_streams):
                 raise Exception("Failed to retrieve loudness metadata for all audio streams.")
 
-            self.logger.info("Loudness analysis complete. Proceeding with normalization.")
+            self.logger.info("Loudness analysis complete. Proceeding with normalization.\n\n[bold]Normalization Parameters:[/bold]\n" 
+                + json.dumps(NORMALIZATION_PARAMS, indent=4)
+                + "\n[bold]Analysis Metadata:[/bold]\n" 
+                + json.dumps(loudness_metadata, indent=4))
+            
             filter_complex = []
             for i, metadata in enumerate(loudness_metadata):
                 filter_complex.append(
@@ -92,7 +97,7 @@ class AudioProcessor:
 
             ffmpeg_command.extend(["-c:v", "copy", "-c:a", "ac3", "-b:a", "256k", temp_output_path])
 
-            self.logger.info(f"Running FFmpeg normalization on {media_path}")
+            self.logger.info(f"Running FFmpeg normalization.\n\n [bold]File:[/bold] {media_path}\n[bold]Temporary Output:[/bold] {temp_output_path}")
             result = subprocess.run(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8')
             if result.returncode != 0:
                 raise Exception(result.stderr)
@@ -114,6 +119,7 @@ class AudioProcessor:
                 self.logger.info(f"Removed temporary file:\n{temp_output_path}")
             self.logger.error(f"Normalization failed.\n[bold]File:[/bold] {media_path}\nError: {e}")
             return None
+
 
     def filter_audio(self, media_path, volume_boost_percentage):
         """

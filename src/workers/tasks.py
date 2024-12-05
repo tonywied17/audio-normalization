@@ -77,7 +77,7 @@ def process_directory(directory, temp_files=None):
         results = []
         task = progress.add_task("[cyan]Normalizing Audio...", total=len(media_files))
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
             futures = [
                 executor.submit(process_file, 1, media_path, None, temp_files, is_single_file=False)
                 for media_path in media_files
