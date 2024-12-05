@@ -2,7 +2,7 @@ import os
 import sys
 import signal
 import threading
-from src.logger import Logger
+from src.util.logger import Logger
 
 class SignalHandler:
     def __init__(self, temp_files):
