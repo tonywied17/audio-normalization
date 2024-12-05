@@ -3,14 +3,13 @@ import concurrent.futures
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.live import Live
-from src.processing.audio import normalize_audio, filter_audio
+from src.processing.audio import AudioProcessor
 from src.workers.worker import workers, max_workers, update_worker_table, print_summary_table
 from src.util.logger import Logger
 
 console = Console()
 logger = Logger(log_file="process.log")
 queue = []
-
 
 progress = Progress(
     SpinnerColumn(),
@@ -36,6 +35,7 @@ def process_queue(live=None):
             worker.assign_task(task_description, file_path)
             log_and_update_ui(task_description, file_path, live)
             break
+
 
 #! -- Process Directory -- 
 def process_directory(directory, temp_files=None):
@@ -110,9 +110,11 @@ def process_directory(directory, temp_files=None):
 
 #! -- Process File -- 
 def process_file(option, media_path, volume_boost_percentage=None, temp_files=None, is_single_file=True):
+    
     task_description = "Normalize Audio" if option == 1 else f"Boost {volume_boost_percentage}% Audio"
     success = False
-
+    audio_processor = AudioProcessor(temp_files=temp_files)
+    
     if is_single_file:
         worker_assigned = False
         for worker in workers:
@@ -126,11 +128,9 @@ def process_file(option, media_path, volume_boost_percentage=None, temp_files=No
             log_and_update_ui(task_description, media_path, live=None)
 
         if option == 1:
-            result = normalize_audio(media_path, temp_files)
-            success = result is not None
+            success = audio_processor.normalize_audio(media_path) is not None
         elif option == 3 and volume_boost_percentage is not None:
-            result = filter_audio(media_path, volume_boost_percentage, temp_files)
-            success = result is not None
+            success = audio_processor.filter_audio(media_path, volume_boost_percentage) is not None
 
         for worker in workers:
             if worker.is_busy and worker.file_path == media_path:
@@ -138,17 +138,13 @@ def process_file(option, media_path, volume_boost_percentage=None, temp_files=No
 
     else:
         if option == 1:
-            result = normalize_audio(media_path, temp_files)
-            success = result is not None
+            success = audio_processor.normalize_audio(media_path) is not None
 
         for worker in workers:
             if worker.is_busy and worker.file_path == media_path:
                 worker.complete_task(process_queue, live=None)
 
     status_message = "Success" if success else "Failed"
-    
-    # logger.success(f"{task_description} completed.\nStatus: {status_message}\nFile: {media_path}") if success else logger.error(
-    #     f"Task {task_description} failed for file: {media_path}")
 
     if is_single_file and all(not worker.is_busy for worker in workers):
         print_summary_table([{
