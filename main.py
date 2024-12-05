@@ -3,13 +3,12 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich import box
-from src.workers.tasks import TaskProcessor
+from src.workers.tasks import process_file, process_directory
 from src.util.signal_handler import SignalHandler
 
 temp_files = []
-console = Console()
 signal_handler = SignalHandler(temp_files)
-task_processor = TaskProcessor(log_file="process.log") 
+console = Console()
 
 
 def clean_path(path):
@@ -35,9 +34,9 @@ def main():
             menu_table.add_column("Option", justify="center", style="bold yellow")
             menu_table.add_column("Description", justify="left", style="italic green")
 
-            menu_table.add_row("1", "Normalize Audio Track for a Media File")
-            menu_table.add_row("2", "Normalize Audio Tracks for All Media Files in a Directory")
-            menu_table.add_row("3", "Apply Simple Audio Boost to Media File")
+            menu_table.add_row("1", "Normalize Audio Track for a Video File")
+            menu_table.add_row("2", "Normalize Audio Tracks for All Video Files in a Directory")
+            menu_table.add_row("3", "Apply Simple Audio Boost to Video File")
             menu_table.add_row("4", "[red bold]Exit[/red bold]")
 
             menu_panel = Panel(
@@ -51,14 +50,14 @@ def main():
             choice = console.input("[bold yellow]Enter your choice:[/bold yellow] ").strip()
 
             if choice == '1':
-                media_path = console.input("[bold cyan]Enter the path to the media file:[/bold cyan] ").strip()
-                media_path = clean_path(media_path)
+                video_path = console.input("[bold cyan]Enter the path to the video file:[/bold cyan] ").strip()
+                video_path = clean_path(video_path)
 
-                if not os.path.exists(media_path):
-                    console.print("[orange_red1]The specified media path does not exist. Please try again.[/orange_red1]")
+                if not os.path.exists(video_path):
+                    console.print("[orange_red1]The specified video path does not exist. Please try again.[/orange_red1]")
                     continue
 
-                task_processor.process_file(1, media_path, temp_files=temp_files, is_single_file=True)
+                process_file(1, video_path, temp_files=temp_files, is_single_file=True)
 
             elif choice == '2':
                 directory = console.input("[bold cyan]Enter the path to the directory:[/bold cyan] ").strip()
@@ -71,14 +70,14 @@ def main():
                     console.print("[orange_red1]The specified directory does not exist. Please try again.[/orange_red1]")
                     continue
 
-                task_processor.process_directory(directory, temp_files=temp_files)
+                process_directory(directory, temp_files=temp_files)
 
             elif choice == '3':
-                media_path = console.input("[bold cyan]Enter the path to the media file:[/bold cyan] ").strip()
-                media_path = clean_path(media_path)
+                video_path = console.input("[bold cyan]Enter the path to the video file:[/bold cyan] ").strip()
+                video_path = clean_path(video_path)
 
-                if not os.path.exists(media_path):
-                    console.print("[orange_red1]The specified media path does not exist. Please try again.[/orange_red1]")
+                if not os.path.exists(video_path):
+                    console.print("[orange_red1]The specified video path does not exist. Please try again.[/orange_red1]")
                     continue
 
                 volume_boost_percentage = console.input(
@@ -87,7 +86,7 @@ def main():
 
                 try:
                     volume_boost_percentage = float(volume_boost_percentage)
-                    task_processor.process_file(3, media_path, volume_boost_percentage=volume_boost_percentage, temp_files=temp_files, is_single_file=True)
+                    process_file(3, video_path, volume_boost_percentage=volume_boost_percentage, temp_files=temp_files, is_single_file=True)
 
                 except ValueError:
                     console.print("[orange_red1]Invalid percentage value. Please enter a valid number.[/orange_red1]")
