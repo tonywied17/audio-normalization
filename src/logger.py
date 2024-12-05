@@ -29,22 +29,23 @@ class Logger:
         return f"{timestamp} | {level.value} | {message}"
 
     def _write_to_file(self, message: str):
-        """Write the log message to the log file without newlines."""
+        """Write the log message to the log file without newlines and strip Rich tags."""
         try:
-            message = message.replace("\n", " ")
+            stripped_message = Text.from_markup(message).plain
+            stripped_message = stripped_message.replace("\n", " ")
             with open(self.log_file, "a", encoding="utf-8") as f:
-                f.write(message + "\n")
+                f.write(stripped_message + "\n")
         except OSError as e:
             self.console.print(f"[red]Error writing to log file: {e}[/red]")
 
     def _print_log_table(self, level: LogLevel, message: str):
         """Display the log message in a rich table format."""
-        table = Table(show_header=True, header_style="bold magenta", box=box.SIMPLE)
-        table.add_column("Level", style="bold", width=10)
-        table.add_column("Timestamp", style="dim", width=20)
-        table.add_column("Message", style="green")
+        table = Table(show_header=True, header_style="bold magenta", box=box.SIMPLE, expand=True)
+        table.add_column("Level", style="bold", width=10, justify="center")
+        table.add_column("Message", style="green", width=60, justify="left")
+        table.add_column("Timestamp", style="dim", width=20, justify="right")
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        table.add_row(level.value, timestamp, message)
+        table.add_row(level.value, message, timestamp)
 
         if level == LogLevel.INFO:
             self.console.print(table, style="cyan")

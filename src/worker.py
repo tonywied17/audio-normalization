@@ -71,10 +71,10 @@ def update_worker_table(workers, queue):
         style="cyan"
     )
 
-    table.add_column("Worker ID", justify="center", style="cyan")
-    table.add_column("Task", justify="left", style="italic magenta")
-    table.add_column("File Path", justify="left", style="dim cyan")
-    table.add_column("Status", justify="center", style="bold green")
+    table.add_column("Worker ID", justify="center", style="cyan", width=5)
+    table.add_column("Task", justify="left", style="italic magenta", width=20)
+    table.add_column("File Path", justify="left", style="dim cyan", width=40)
+    table.add_column("Status", justify="center", style="bold green", width=20)
 
     # workers
     for worker in workers:
@@ -103,10 +103,13 @@ def print_summary_table(results):
     """
     summary_table = Table(
         title="📋 Task Summary",
-        title_style="bold blue",
+        title_style="bold green",
         show_header=True,
         header_style="bold magenta",
         box=box.SIMPLE,
+        expand=True,
+        show_lines=True,
+        style="cyan"
     )
     summary_table.add_column("File Path", style="dim cyan", width=40)
     summary_table.add_column("Task", justify="center", style="italic magenta", width=20)

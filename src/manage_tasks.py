@@ -15,7 +15,7 @@ queue = []
 
 def log_and_update_ui(task_desc, media_path, live=None):
     """Logs the task and updates the live table."""
-    logger.info(f"Assigned task to worker.\n{task_desc}\nFile: {media_path}")
+    logger.info(f"Assigned task to worker.\n\n[bold]Task:[/bold] {task_desc}\n[bold]File:[/bold] {media_path}")
     if live:
         live.update(update_worker_table(workers, queue))
 
@@ -139,8 +139,9 @@ def process_file(option, media_path, volume_boost_percentage=None, temp_files=No
                 worker.complete_task(process_queue, live=None)
 
     status_message = "Success" if success else "Failed"
-    logger.success(f"{task_description} completed.\nStatus: {status_message}\nFile: {media_path}") if success else logger.error(
-        f"Task {task_description} failed for file: {media_path}")
+    
+    # logger.success(f"{task_description} completed.\nStatus: {status_message}\nFile: {media_path}") if success else logger.error(
+    #     f"Task {task_description} failed for file: {media_path}")
 
     if is_single_file and all(not worker.is_busy for worker in workers):
         print_summary_table([{
