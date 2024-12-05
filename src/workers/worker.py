@@ -1,7 +1,7 @@
 from rich.console import Console
 from rich.table import Table
 from rich import box
-import os
+from src.util.values import CoreCount
 
 console = Console()
 
@@ -43,9 +43,8 @@ class Worker:
 
 
 #! Global worker pool
-max_workers = os.cpu_count()
+max_workers = CoreCount.get_core_count('physical')
 workers = [Worker(i + 1, max_workers) for i in range(max_workers)]
-
 
 def get_idle_worker():
     """Returns an idle worker from the global worker pool."""
@@ -71,7 +70,7 @@ def update_worker_table(workers, queue):
         style="cyan"
     )
 
-    table.add_column("Worker ID", justify="center", style="cyan", width=5)
+    table.add_column("Worker ID", justify="center", style="bold cyan", width=5)
     table.add_column("Task", justify="left", style="italic magenta", width=20)
     table.add_column("File Path", justify="left", style="dim cyan", width=40)
     table.add_column("Status", justify="center", style="bold green", width=20)

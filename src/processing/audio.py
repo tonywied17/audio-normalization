@@ -4,7 +4,7 @@ import subprocess
 import json
 from rich.console import Console
 from src.util.logger import Logger
-from src.util.constants import NORMALIZATION_PARAMS
+from src.util.values import NORMALIZATION_PARAMS
 
 class AudioProcessor:
     
