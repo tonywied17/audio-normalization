@@ -63,13 +63,15 @@ def update_worker_table(workers, queue):
         title="🎯 Worker Status",
         title_style="bold green",
         show_header=True,
-        header_style="bold cyan",
+        header_style="bold magenta",
         box=box.SIMPLE,
         show_footer=False,
-        expand=True
+        expand=True,
+        show_lines=True,
+        style="cyan"
     )
 
-    table.add_column("Worker ID", justify="center", style="bold yellow")
+    table.add_column("Worker ID", justify="center", style="cyan")
     table.add_column("Task", justify="left", style="italic magenta")
     table.add_column("File Path", justify="left", style="dim cyan")
     table.add_column("Status", justify="center", style="bold green")

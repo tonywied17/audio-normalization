@@ -6,17 +6,20 @@ from rich.text import Text
 from rich.table import Table
 from rich import box
 
+
 class LogLevel(Enum):
     INFO = "INFO"
     ERROR = "ERROR"
     SUCCESS = "SUCCESS"
 
+
 class Logger:
+    
     def __init__(self, log_file="app.log", log_dir="logs"):
         self.log_dir = os.path.join(os.getcwd(), log_dir)
         self.log_file = os.path.join(self.log_dir, log_file)
         self.console = Console()
-
+        
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
 
@@ -40,7 +43,6 @@ class Logger:
         table.add_column("Level", style="bold", width=10)
         table.add_column("Timestamp", style="dim", width=20)
         table.add_column("Message", style="green")
-
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         table.add_row(level.value, timestamp, message)
 
@@ -54,7 +56,6 @@ class Logger:
     def log(self, level: LogLevel, message: str):
         """Log a message with the given log level."""
         formatted_message = self._format_message(level, message)
-        
         self._write_to_file(formatted_message)
         self._print_log_table(level, message) 
 

@@ -105,13 +105,10 @@ def normalize_audio(video_path, temp_files):
         return final_output_path
 
     except Exception as e:
+        if os.path.exists(temp_output_path):
+            os.remove(temp_output_path)
+            logger.info(f"Removed temporary file:\n{temp_output_path}")
         return None
-
-    finally:
-        for temp_file in temp_files:
-            if os.path.exists(temp_file):
-                os.remove(temp_file)
-                logger.info(f"Removed temp file: {temp_file}")
                 
                 
 def filter_audio(video_path, volume_boost_percentage, temp_files):

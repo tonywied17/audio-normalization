@@ -13,9 +13,9 @@ progress = Progress(SpinnerColumn(), TextColumn("{task.description}"), console=c
 queue = []
 
 
-def log_and_update_ui(task_desc, video_path, live=None):
+def log_and_update_ui(task_desc, media_path, live=None):
     """Logs the task and updates the live table."""
-    logger.info(f"Assigned task to worker.\n{task_desc}\nFile: {video_path}")
+    logger.info(f"Assigned task to worker.\n{task_desc}\nFile: {media_path}")
     if live:
         live.update(update_worker_table(workers, queue))
 
@@ -37,55 +37,55 @@ def process_directory(directory, temp_files=None):
         temp_files = []
 
     with progress:
-        task_id = progress.add_task("Scanning for video files...", start=False)
-        video_files = []
+        task_id = progress.add_task("Scanning for media files...", start=False)
+        media_files = []
 
         for root, _, files in os.walk(directory):
             for file in files:
                 if file.lower().endswith(('.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm', '.m4v', '.mpg', '.mpeg', '.mp3', '.wav', '.flac', '.ogg', '.m4a', '.wma', '.aac')): 
-                    video_files.append(os.path.join(root, file))
+                    media_files.append(os.path.join(root, file))
             progress.advance(task_id)
 
-        progress.update(task_id, total=len(video_files), completed=len(video_files), visible=False)
+        progress.update(task_id, total=len(media_files), completed=len(media_files), visible=False)
 
-    if not video_files:
-        logger.error("No video files found in the specified directory or its subdirectories.")
+    if not media_files:
+        logger.error("No media files found in the specified directory or its subdirectories.")
         return
 
     with Live(update_worker_table(workers, queue), refresh_per_second=1, console=console) as live:
-        for video_path in video_files:
+        for media_path in media_files:
             worker_assigned = False
             for worker in workers:
-                if worker.assign_task("Normalize Audio", video_path):
+                if worker.assign_task("Normalize Audio", media_path):
                     worker_assigned = True
-                    log_and_update_ui("Normalize Audio", video_path, live)
+                    log_and_update_ui("Normalize Audio", media_path, live)
                     break
 
             if not worker_assigned:
-                queue.append(("Normalize Audio", video_path))
-                log_and_update_ui("Normalize Audio", video_path, live)
+                queue.append(("Normalize Audio", media_path))
+                log_and_update_ui("Normalize Audio", media_path, live)
                 
             live.update(update_worker_table(workers, queue))
 
         results = []
-        task = progress.add_task("[cyan]Normalizing Audio...", total=len(video_files))
+        task = progress.add_task("[cyan]Normalizing Audio...", total=len(media_files))
 
         with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
             futures = [
-                executor.submit(process_file, 1, video_path, None, temp_files, is_single_file=False)
-                for video_path in video_files
+                executor.submit(process_file, 1, media_path, None, temp_files, is_single_file=False)
+                for media_path in media_files
             ]
 
             while futures:
                 for future in concurrent.futures.as_completed(futures):
-                    task_desc, video_path, success = future.result()
+                    task_desc, media_path, success = future.result()
 
                     for worker in workers:
-                        if worker.is_busy and worker.file_path == video_path:
+                        if worker.is_busy and worker.file_path == media_path:
                             worker.complete_task(process_queue, live)
 
                     results.append({
-                        "file": video_path,
+                        "file": media_path,
                         "task": task_desc,
                         "status": "Success" if success else "Failed"
                     })
@@ -102,51 +102,51 @@ def process_directory(directory, temp_files=None):
 
 
 #! -- Process File -- 
-def process_file(option, video_path, volume_boost_percentage=None, temp_files=None, is_single_file=True):
+def process_file(option, media_path, volume_boost_percentage=None, temp_files=None, is_single_file=True):
     task_description = "Normalize Audio" if option == 1 else f"Boost {volume_boost_percentage}% Audio"
     success = False
 
     if is_single_file:
         worker_assigned = False
         for worker in workers:
-            if worker.assign_task(task_description, video_path):
+            if worker.assign_task(task_description, media_path):
                 worker_assigned = True
-                log_and_update_ui(task_description, video_path, live=None)
+                log_and_update_ui(task_description, media_path, live=None)
                 break
 
         if not worker_assigned:
-            queue.append((task_description, video_path))
-            log_and_update_ui(task_description, video_path, live=None)
+            queue.append((task_description, media_path))
+            log_and_update_ui(task_description, media_path, live=None)
 
         if option == 1:
-            result = normalize_audio(video_path, temp_files)
+            result = normalize_audio(media_path, temp_files)
             success = result is not None
         elif option == 3 and volume_boost_percentage is not None:
-            result = filter_audio(video_path, volume_boost_percentage, temp_files)
+            result = filter_audio(media_path, volume_boost_percentage, temp_files)
             success = result is not None
 
         for worker in workers:
-            if worker.is_busy and worker.file_path == video_path:
+            if worker.is_busy and worker.file_path == media_path:
                 worker.complete_task(process_queue, live=None)
 
     else:
         if option == 1:
-            result = normalize_audio(video_path, temp_files)
+            result = normalize_audio(media_path, temp_files)
             success = result is not None
 
         for worker in workers:
-            if worker.is_busy and worker.file_path == video_path:
+            if worker.is_busy and worker.file_path == media_path:
                 worker.complete_task(process_queue, live=None)
 
     status_message = "Success" if success else "Failed"
-    logger.success(f"{task_description} completed.\nStatus: {status_message}\nFile: {video_path}") if success else logger.error(
-        f"Task {task_description} failed for file: {video_path}")
+    logger.success(f"{task_description} completed.\nStatus: {status_message}\nFile: {media_path}") if success else logger.error(
+        f"Task {task_description} failed for file: {media_path}")
 
     if is_single_file and all(not worker.is_busy for worker in workers):
         print_summary_table([{
-            "file": video_path,
+            "file": media_path,
             "task": task_description,
             "status": status_message
         }])
 
-    return task_description, video_path, success
+    return task_description, media_path, success
