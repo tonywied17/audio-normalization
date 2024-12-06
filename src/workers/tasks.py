@@ -62,6 +62,15 @@ class TaskProcessor:
         else:
             self.console.print(update_worker_table(workers, self.queue))
 
+    def process_queue(self, live=None):
+        """Assign tasks from the queue to idle workers."""
+        for worker in workers:
+            if not worker.is_busy and self.queue:
+                task_description, file_path = self.queue.pop(0)
+                worker.assign_task(task_description, file_path)
+                self.log_and_update_ui(task_description, file_path, live)
+                break
+    
     def process_directory(self, directory, temp_files=None):
         """Process all media files in the specified directory.
 
@@ -101,7 +110,7 @@ class TaskProcessor:
                     self.queue.append(("Normalize Audio", media_path))
                     self.log_and_update_ui("Normalize Audio", media_path, live)
 
-                live.update(update_worker_table(workers, self.queue))
+                self.process_queue(live)
 
             task = self.progress.add_task("[cyan]Normalizing Audio...", total=len(media_files))
 
@@ -126,7 +135,7 @@ class TaskProcessor:
                         })
 
                         self.progress.advance(task)
-                        live.update(update_worker_table(workers, self.queue))
+                        self.process_queue(live)
 
                     futures = [f for f in futures if not f.done()]
 
