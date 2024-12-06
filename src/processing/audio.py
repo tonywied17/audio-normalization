@@ -27,7 +27,6 @@ class AudioProcessor:
         """
         if temp_file_path not in self.temp_files:
             self.temp_files.append(temp_file_path)
-            # self.logger.info(f"Temporary file for processing.\n\n[bold]Temporary file:[/bold] {temp_file_path}")
 
 
     def update_audio_track_title(self, original_title, operation, extra_info=""):
@@ -68,7 +67,7 @@ class AudioProcessor:
         self.notify_temp_file(temp_output_path)
 
         try:
-            self.logger.info(f"Probing audio streams.\n\n[bold]File:[/bold] {media_path}.")
+            self.logger.info(f"Probing audio streams.\n\n[bold]File:[/bold] {media_path}")
             ffprobe_command = [
                 "ffprobe", "-i", media_path,
                 "-show_streams", "-select_streams", "a", "-loglevel", "quiet", "-print_format", "json"
@@ -130,20 +129,20 @@ class AudioProcessor:
 
             if os.path.exists(media_path) and file_ext.lower() == '.mp4':
                 os.remove(media_path)
-                self.logger.info(f"[bold]Replacing original file:[/bold]\n{media_path}")
+                self.logger.info(f"[bold]Replacing original file:[/bold]\n\n{media_path}")
 
             if os.path.exists(final_output_path):
                 os.remove(final_output_path)
             os.rename(temp_output_path, final_output_path)
             
-            self.logger.success(f"Normalization completed.\n[bold]File:[/bold] {media_path}")
+            self.logger.success(f"Normalization completed.\n\n[bold]File:[/bold] {media_path}")
             return final_output_path
 
         except Exception as e:
             if os.path.exists(temp_output_path):
                 os.remove(temp_output_path)
                 self.logger.info(f"Removed temporary file:\n{temp_output_path}")
-            self.logger.error(f"Normalization failed.\n[bold]File:[/bold] {media_path}\nError: {e}")
+            self.logger.error(f"Normalization failed.\n\n[bold]File:[/bold] {media_path}\n[bold]Error:[/bold] {e}")
             return None
 
 
@@ -167,7 +166,7 @@ class AudioProcessor:
         self.notify_temp_file(temp_output_path)
 
         try:
-            self.logger.info(f"Probing audio streams.\n\n[bold]File:[/bold] {media_path}.")
+            self.logger.info(f"Probing audio streams.\n\n[bold]File:[/bold] {media_path}")
             ffprobe_command = [
                 "ffprobe", "-i", media_path, "-show_streams",
                 "-select_streams", "a", "-loglevel", "quiet", "-print_format", "json"
@@ -196,17 +195,17 @@ class AudioProcessor:
 
             if os.path.exists(media_path):
                 os.remove(media_path)
-                self.logger.info(f"[bold]Replacing original file:[/bold]\n{media_path}")
+                self.logger.info(f"[bold]Replacing original file:[/bold]\n\n{media_path}")
 
             if os.path.exists(temp_output_path):
                 os.rename(temp_output_path, media_path)
 
-            self.logger.success(f"Volume adjustment completed: {volume_boost_percentage}%.")
+            self.logger.success(f"Volume adjustment completed: {volume_boost_percentage}%")
             return True
 
         except Exception as e:
             if os.path.exists(temp_output_path):
                 os.remove(temp_output_path)
-                self.logger.info(f"Removed temporary file:\n{temp_output_path}")
+                self.logger.info(f"Removed temporary file:\n\n{temp_output_path}")
             self.logger.error(f"Volume adjustment failed: {e}")
             return False
