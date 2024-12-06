@@ -10,6 +10,7 @@ from src.util.logger import Logger
 console = Console()
 logger = Logger(log_file="process.log")
 queue = []
+results = []
 
 progress = Progress(
     SpinnerColumn(),
@@ -24,6 +25,8 @@ def log_and_update_ui(task_desc, media_path, live=None):
     logger.info(f"Assigned task to worker.\n\n[bold]Task:[/bold] {task_desc}\n[bold]File:[/bold] {media_path}")
     if live:
         live.update(update_worker_table(workers, queue))
+    else:
+        console.print(update_worker_table(workers, queue))
 
 
 #! -- Process Queue -- 
@@ -74,7 +77,6 @@ def process_directory(directory, temp_files=None):
                 
             live.update(update_worker_table(workers, queue))
 
-        results = []
         task = progress.add_task("[cyan]Normalizing Audio...", total=len(media_files))
 
         with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -105,7 +107,7 @@ def process_directory(directory, temp_files=None):
         progress.stop()
 
         if all(not worker.is_busy for worker in workers):
-            print_summary_table(results)
+            console.print(print_summary_table(results))
 
 
 #! -- Process File -- 
@@ -136,6 +138,15 @@ def process_file(option, media_path, volume_boost_percentage=None, temp_files=No
             if worker.is_busy and worker.file_path == media_path:
                 worker.complete_task(process_queue, live=None)
 
+        status_message = "Success" if success else "Failed"
+
+        results.append({
+            "file": media_path,
+            "task": task_description,
+            "status": status_message
+        })
+        
+        console.print(print_summary_table(results))
     else:
         if option == 1:
             success = audio_processor.normalize_audio(media_path) is not None
@@ -143,14 +154,5 @@ def process_file(option, media_path, volume_boost_percentage=None, temp_files=No
         for worker in workers:
             if worker.is_busy and worker.file_path == media_path:
                 worker.complete_task(process_queue, live=None)
-
-    status_message = "Success" if success else "Failed"
-
-    if is_single_file and all(not worker.is_busy for worker in workers):
-        print_summary_table([{
-            "file": media_path,
-            "task": task_description,
-            "status": status_message
-        }])
-
+        
     return task_description, media_path, success

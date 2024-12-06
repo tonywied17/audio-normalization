@@ -2,11 +2,19 @@ from rich.console import Console
 from rich.table import Table
 from rich import box
 from src.util.values import CoreCount
+from src.util.logger import Logger
 
 console = Console()
+logger = Logger(log_file="process.log")
 
 class Worker:
     def __init__(self, worker_id, max_workers):
+        """Initialize the Worker instance.
+
+        Args:
+            worker_id (int): Worker ID.
+            max_workers (int): Maximum number of workers.
+        """
         self.worker_id = worker_id
         self.max_workers = max_workers
         self.is_busy = False
@@ -14,8 +22,18 @@ class Worker:
         self.file_path = None
         self.status = "Idle"
 
+
     def assign_task(self, task_description, file_path, status="Processing"):
-        """Assign a task to the worker if it's not already busy."""
+        """Assign a task to the worker.
+
+        Args:
+            task_description (str): Task description.
+            file_path (str): Path to the file.
+            status (str, optional): Task status. Defaults to "Processing".
+
+        Returns:
+            bool: True if the task is assigned, False otherwise.
+        """
         if not self.is_busy:
             self.is_busy = True
             self.task_description = task_description
@@ -24,8 +42,14 @@ class Worker:
             return True
         return False
 
+
     def complete_task(self, process_queue_callback, live=None):
-        """Complete the task and set worker status back to Idle."""
+        """Complete the task and update the worker status.
+
+        Args:
+            process_queue_callback (function): Callback function to process the queue.
+            live (Live, optional): Rich Live instance. Defaults to None.
+        """
         self.is_busy = False
         self.task_description = None
         self.file_path = None
@@ -55,8 +79,14 @@ def get_idle_worker():
 
 
 def update_worker_table(workers, queue):
-    """
-    Generate a dynamic Rich table showing the status of workers and a formatted queue section.
+    """Update the worker status table with the current worker and queue status.
+
+    Args:
+        workers (list): List of Worker instances.
+        queue (list): List of tuples containing task and file path.
+
+    Returns:
+        Table: Updated worker status table.
     """
     table = Table(
         title="🎯 Worker Status",
@@ -97,15 +127,14 @@ def update_worker_table(workers, queue):
 
 
 def print_summary_table(results):
-    """
-    Generate and print the summary table for all completed tasks.
-    """
+
     summary_table = Table(
         title="📋 Task Summary",
         title_style="bold green",
         show_header=True,
         header_style="bold magenta",
         box=box.SIMPLE,
+        show_footer=False,
         expand=True,
         show_lines=True,
         style="cyan"
@@ -121,5 +150,4 @@ def print_summary_table(results):
             f"[green]{result['status']}[/green]" if result["status"] == "Success" else f"[red]{result['status']}[/red]"
         )
 
-    console.clear()
-    console.print(summary_table)
+    return summary_table

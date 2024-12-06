@@ -9,14 +9,21 @@ from src.util.values import NORMALIZATION_PARAMS
 class AudioProcessor:
     
     def __init__(self, temp_files=None):
+        """Initialize the AudioProcessor.
+
+        Args:
+            temp_files (list, optional): List of temporary files. Defaults to None.
+        """
         self.console = Console()
         self.logger = Logger(log_file="process.log")
         self.temp_files = temp_files
         
         
     def notify_temp_file(self, temp_file_path):
-        """
-        Adds the temporary file to the list and triggers a signal handler if defined.
+        """Notify the processor about a temporary file for processing.
+
+        Args:
+            temp_file_path (str): Path to the temporary file.
         """
         if temp_file_path not in self.temp_files:
             self.temp_files.append(temp_file_path)
@@ -24,8 +31,15 @@ class AudioProcessor:
 
 
     def update_audio_track_title(self, original_title, operation, extra_info=""):
-        """
-        Clean up existing prefixes/suffixes and update the title.
+        """Update the audio track title with the operation and extra information.
+
+        Args:
+            original_title (str): Original audio track title.
+            operation (str): Operation performed on the audio track.
+            extra_info (str, optional): Additional information. Defaults to "".
+
+        Returns:
+            _type_: _description_
         """
         cleaned_title = re.sub(r"molexAudio (Normalized|Boosted \d+% )?", "", original_title).strip()
         if extra_info:
@@ -35,8 +49,18 @@ class AudioProcessor:
 
 
     def normalize_audio(self, media_path):
-        """
-        Normalize audio levels for all audio streams in the media using a two-pass process.
+        """Normalize audio streams in the media file.
+
+        Args:
+            media_path (str): Path to the media file.
+
+        Raises:
+            Exception: If FFmpeg commands fail.
+            Exception: If no audio streams are found in the media.
+            Exception: If loudness metadata is not found for all audio streams.
+
+        Returns:
+            str: Path to the normalized media file.
         """
         file_base, file_ext = os.path.splitext(media_path)
         temp_output_path = f"{file_base}_Normalized_TEMP.mkv"
@@ -60,6 +84,7 @@ class AudioProcessor:
             for i in range(len(audio_streams)):
                 first_pass_command = [
                     "ffmpeg", "-i", media_path,
+                    "-threads", "0",
                     "-map", f"0:a:{i}",
                     "-af", f"loudnorm=I={NORMALIZATION_PARAMS['I']}:TP={NORMALIZATION_PARAMS['TP']}:LRA={NORMALIZATION_PARAMS['LRA']}:print_format=json",
                     "-f", "null", "-"
@@ -87,6 +112,7 @@ class AudioProcessor:
 
             ffmpeg_command = [
                 "ffmpeg", "-y", "-i", media_path,
+                "-threads", "0",
                 "-filter_complex", "; ".join(filter_complex),
                 "-map", "0:v"
             ]
@@ -97,7 +123,7 @@ class AudioProcessor:
 
             ffmpeg_command.extend(["-c:v", "copy", "-c:a", "ac3", "-b:a", "256k", temp_output_path])
 
-            self.logger.info(f"Running FFmpeg normalization.\n\n [bold]File:[/bold] {media_path}\n[bold]Temporary Output:[/bold] {temp_output_path}")
+            self.logger.info(f"Running FFmpeg normalization.\n\n[bold]File:[/bold] {media_path}\n[bold]Temporary Output:[/bold] {temp_output_path}")
             result = subprocess.run(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8')
             if result.returncode != 0:
                 raise Exception(result.stderr)
@@ -122,8 +148,18 @@ class AudioProcessor:
 
 
     def filter_audio(self, media_path, volume_boost_percentage):
-        """
-        Apply audio filter with volume boost to the media, handling multiple audio tracks.
+        """Filter audio streams in the media and apply volume boost.
+
+        Args:
+            media_path (str): Path to the media file.
+            volume_boost_percentage (int): Percentage to boost audio volume.
+
+        Raises:
+            Exception: If FFmpeg commands fail.
+            Exception: If no audio streams are found in the media.
+
+        Returns:
+            bool: True if the operation is successful, False
         """
         file_base, file_ext = os.path.splitext(media_path)
         temp_output_path = f"{file_base}_Boosted{file_ext}"
@@ -148,6 +184,7 @@ class AudioProcessor:
                 original_title = stream.get('tags', {}).get('title', f"Track {i + 1}")
                 new_title = self.update_audio_track_title(original_title, "Boosted", f"{volume_boost_percentage}%")
                 ffmpeg_command.extend([
+                    "-threads", "0",
                     f"-filter:a:{i}", f"volume={volume_boost}",
                     f"-metadata:s:a:{i}", f"title={new_title}"
                 ])
