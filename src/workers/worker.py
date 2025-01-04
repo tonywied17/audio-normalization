@@ -8,6 +8,7 @@ console = Console()
 logger = Logger(log_file="process.log")
 
 class Worker:
+    
     def __init__(self, worker_id, max_workers):
         """Initialize the Worker instance.
 
@@ -28,42 +29,45 @@ class Worker:
 
         Args:
             task_description (str): Task description.
-            file_path (str): Path to the file.
+            file_path (str): File path.
             status (str, optional): Task status. Defaults to "Processing".
 
         Returns:
-            bool: True if the task is assigned, False otherwise.
+            _type_: _description_
         """
         if not self.is_busy:
             self.is_busy = True
             self.task_description = task_description
             self.file_path = file_path
             self.status = status
+            logger.info(f"Assigned to Worker {self.worker_id}.\n\n[bold]Task:[/bold] {self.task_description}\n[bold]File:[/bold] {self.file_path}")
             return True
+        else:
+            logger.warning(f"Worker {self.worker_id} is busy. Task not assigned.")
         return False
 
 
-    def complete_task(self, process_queue_callback, live=None):
+    def complete_task(self, task_processor, live=None):
         """Complete the task and update the worker status.
 
         Args:
-            process_queue_callback (function): Callback function to process the queue.
+            task_processor (TaskProcessor): The TaskProcessor instance.
             live (Live, optional): Rich Live instance. Defaults to None.
         """
         self.is_busy = False
         self.task_description = None
         self.file_path = None
         self.status = "Idle"
-        
-        if process_queue_callback:
-            process_queue_callback(live)
-            
+
+        task_processor.display_and_update_worker_table(live)
+        task_processor.process_queue(live)
+
+
     def __str__(self):
         if self.is_busy:
             return f"Worker {self.worker_id} - {self.task_description} - {self.file_path} - Status: {self.status}"
         else:
             return f"Worker {self.worker_id} - Idle - Status: {self.status}"
-
 
 
 #! Global worker pool
@@ -78,56 +82,15 @@ def get_idle_worker():
     return None 
 
 
-def update_worker_table(workers, queue):
-    """Update the worker status table with the current worker and queue status.
+def print_summary_table(results):
+    """Prints a summary table of the task results.
 
     Args:
-        workers (list): List of Worker instances.
-        queue (list): List of tuples containing task and file path.
+        results (list): List of task results.
 
     Returns:
-        Table: Updated worker status table.
+        Table: Rich Table instance.
     """
-    table = Table(
-        title="🎯 Worker Status",
-        title_style="bold green",
-        show_header=True,
-        header_style="bold magenta",
-        box=box.SIMPLE,
-        show_footer=False,
-        expand=True,
-        show_lines=True,
-        style="cyan"
-    )
-
-    table.add_column("Worker ID", justify="center", style="bold cyan", width=5)
-    table.add_column("Task", justify="left", style="italic magenta", width=20)
-    table.add_column("File Path", justify="left", style="dim cyan", width=40)
-    table.add_column("Status", justify="center", style="bold green", width=20)
-
-    # workers
-    for worker in workers:
-        table.add_row(
-            str(worker.worker_id),
-            worker.task_description or "[italic grey]Idle[/italic grey]",
-            worker.file_path or "[italic grey]None[/italic grey]",
-            f"[green]{worker.status}[/green]" if worker.is_busy else "[bold grey]Idle[/bold grey]",
-        )
-
-    table.add_section()
-
-    # queue
-    for idx, (task, file_path) in enumerate(queue, 1):
-        table.add_row(f"Queue-{idx}", task, file_path, "Waiting for Worker")
-
-    if all(not worker.is_busy for worker in workers) and not queue:
-        return
-
-    return table
-
-
-def print_summary_table(results):
-
     summary_table = Table(
         title="📋 Task Summary",
         title_style="bold green",

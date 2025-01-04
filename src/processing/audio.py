@@ -27,6 +27,7 @@ class AudioProcessor:
         """
         if temp_file_path not in self.temp_files:
             self.temp_files.append(temp_file_path)
+            self.logger.info(f"Temporary file created:\n{temp_file_path}")
 
 
     def update_audio_track_title(self, original_title, operation, extra_info=""):
