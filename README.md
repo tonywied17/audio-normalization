@@ -4,7 +4,8 @@
 ![GitHub language count](https://img.shields.io/github/languages/top/tonywied17/audio-normalization?style=for-the-badge)
 ![GitHub last commit](https://img.shields.io/github/last-commit/tonywied17/audio-normalization?style=for-the-badge)
 
-This project allows you to normalize or boost the audio tracks of media files. Many movie soundtracks, particularly surround sound mixes, often have inconsistencies in volume levels. This tool helps to address that by normalizing or boosting the audio to make it more balanced and clear.
+This project is a simple command-line tool for normalizing audio tracks in media files. It uses FFmpeg to process audio files and provides options to normalize the audio track for a single media file, normalize audio tracks for all media files in a directory, and apply a simple audio boost to a media file.
+The tool calculates the average volume level of the audio track and adjusts it to a target level, making the audio more consistent and balanced. It also supports parallel processing to speed up the normalization process for multiple files.
 
 ## Features
 
