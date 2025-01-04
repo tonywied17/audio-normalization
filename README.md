@@ -75,18 +75,19 @@ The application will present a menu with the following options:
 
 After running `python main.py`, you will see a menu. Here's an example interaction:
 
-```
-Option  Description
-------  ------------------------------------------------------------
-1       Normalize Audio Track for a Media File
-2       Normalize Audio Tracks for All Media Files in a Directory
-3       Apply Simple Audio Boost to Media File
-4       Exit
+#### Main Menu
+![Menu](https://molex.cloud/files/an-repo/menu.png)
 
-Enter your choice: 1
-Enter the path to the media file (e.g., E:\Movies\media.mkv): E:\Movies\my_media.mkv
-Processing media for Normalization...
-```
+#### Normalizing an Audio Track for a Media File
+![Normalize File](https://molex.cloud/files/an-repo/normalize_file.png)
+![Normalize File Complete](https://molex.cloud/files/an-repo/normalize_file_complete.png)
+
+#### Normalizing Audio Tracks for All Media Files in a Directory
+![Normalize Directory](https://molex.cloud/files/an-repo/normalize_directory.png)
+![Normalize Directory Table](https://molex.cloud/files/an-repo/normalize_directory_table.png)
+
+#### Applying a Simple Audio Boost to a Media File
+![Audio Boost](https://molex.cloud/files/an-repo/audio_boost.png)
 
 ## Alternative Installation Method (Using Scoop)
 
@@ -94,9 +95,9 @@ For an easier installation with automatic environment variable setup, you can us
 
 ## How It Works
 
-1. **Normalization**: This tool uses FFmpeg to normalize the audio tracks of the media files. It adjusts the volume levels of the audio to bring them to a standard level without clipping.
-2. **Audio Boost**: The tool applies a simple boost to the audio, increasing the volume by the specified percentage.
-3. **Parallel Processing**: The tool supports parallel processing, which speeds up the task when processing multiple files.
+1. **Normalization**: The tool normalizes the audio track of a media file by calculating the average volume level and adjusting the audio to a target level. This helps to balance the audio and make it more consistent across different tracks.
+2. **Audio Boost**: The tool can also apply a simple audio boost to increase (or decrease) the volume level of a media file. This is useful when the audio is too low and needs to be amplified.
+3. **Parallel Processing**: The tool uses parallel processing to speed up the normalization process for multiple files. This allows it to process multiple files simultaneously, making the normalization faster and more efficient.
 
 ## Development
 
