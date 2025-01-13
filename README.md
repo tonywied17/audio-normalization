@@ -42,6 +42,8 @@ pip install -r requirements.txt
 
 This will install the necessary dependencies including `rich` for terminal output and progress bars.
 
+## Usage
+
 ### Normalization Parameters
 
 In the file `util/values.py`, you can adjust the following parameters:
@@ -51,8 +53,6 @@ In the file `util/values.py`, you can adjust the following parameters:
 - **Loudness Range (LRA)**: The target loudness range in LU (Loudness Units). The default value is `11 LU`.
 
 For a more detailed explanation of these parameters, refer to the [EBU R 128 Loudness Standard](r128.pdf).
-
-## Usage
 
 ### Launch the Interactive CLI
 
