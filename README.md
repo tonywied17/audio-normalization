@@ -48,9 +48,11 @@ This will install the necessary dependencies including `rich` for terminal outpu
 
 In the file `util/values.py`, you can adjust the following parameters:
 
-- **Integrated Loudness (I)**: The target integrated loudness level in LUFS (Loudness Units Full Scale). The default value is `-16 LUFS`.
-- **True Peak (TP)**: The target true peak level in dBFS (decibels relative to full scale). The default value is `-1.5 dBFS`.
-- **Loudness Range (LRA)**: The target loudness range in LU (Loudness Units). The default value is `11 LU`.
+| Parameter | Description | Default Value |
+| --- | --- | --- |
+| Integrated Loudness (I) | The target integrated loudness level in LUFS (Loudness Units Full Scale). | `-16 LUFS` |
+| True Peak (TP) | The target true peak level in dBFS (decibels relative to full scale). | `-1.5 dBFS` |
+| Loudness Range (LRA) | The target loudness range in LU (Loudness Units). | `11 LU` |
 
 For a more detailed explanation of these parameters, refer to the [EBU R 128 Loudness Standard](r128.pdf).
 
