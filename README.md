@@ -50,8 +50,7 @@ In the file `util/values.py`, you can adjust the following parameters:
 - **True Peak (TP)**: The target true peak level in dBFS (decibels relative to full scale). The default value is `-1.5 dBFS`.
 - **Loudness Range (LRA)**: The target loudness range in LU (Loudness Units). The default value is `11 LU`.
 
-You can adjust these parameters based on your preferences and requirements.
-
+For a more detailed explanation of these parameters, refer to the [EBU R 128 Loudness Standard](r128.pdf).
 
 ## Usage
 
