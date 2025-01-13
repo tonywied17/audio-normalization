@@ -56,6 +56,16 @@ In the file `util/values.py`, you can adjust the following parameters:
 
 For a more detailed explanation of these parameters, refer to the [EBU R 128 Loudness Standard](r128.pdf).
 
+### Command-Line Arguments
+
+You can use the following arguments when running the tool from the command line:
+
+| Argument                | Description                                                                 | Example Usage                             | Default   |
+|-------------------------|-----------------------------------------------------------------------------|-------------------------------------------|-----------|
+| `-n`, `--normalize`      | Path to a file or directory for normalization.                              | `python main.py -n /path/to/file`         | None      |
+| `-b`, `--boost`          | Path to a file and boost percentage (e.g., +6 for 6% increase).             | `python main.py -b /path/to/file 10`      | None      |
+
+
 ### Launch the Interactive CLI
 
 Run the following command to start the interactive command-line interface (CLI):

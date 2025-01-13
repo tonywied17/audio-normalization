@@ -1,4 +1,6 @@
 import os
+import sys
+import argparse
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -7,14 +9,39 @@ from src.workers.tasks import TaskProcessor, standalone_process_file
 from src.util.signal_handler import SignalHandler
 from src.util.logger import Logger
 
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Audio Normalization CLI Tool")
+    group = parser.add_mutually_exclusive_group()
+
+    # Normalize flag with a required path argument
+    group.add_argument("-n", "--normalize", type=str, metavar="PATH",
+                       help="Path to a file or directory for normalization")
+
+    # Boost flag with a required file and percentage argument
+    group.add_argument("-b", "--boost", nargs=2, metavar=("FILE", "PERCENTAGE"),
+                       help="Path to a single file and boost percentage (e.g., +6 for 6% increase)")
+
+    args = parser.parse_args()
+    
+    # If no arguments are provided, return None for fallback to interactive mode
+    if not any(vars(args).values()):
+        return None
+    
+    return args
+
+
+
 class AudioNormalizationCLI:
-    def __init__(self):
+    def __init__(self, normalize=None, boost=None):
         """Initialize the AudioNormalizationCLI class."""
         self.console = Console()
         self.temp_files = []
         self.signal_handler = SignalHandler(self.temp_files)
         self.logger = Logger(log_file="app.log")
         self.task_processor = TaskProcessor()
+        self.normalize = normalize
+        self.boost = boost
 
     def display_menu(self):
         """Display the main menu."""
@@ -43,6 +70,64 @@ class AudioNormalizationCLI:
         )
         self.console.print(menu_panel)
 
+    def normalize_action(self, path):
+        """Handle normalization for a file or directory."""
+        path = self.clean_path(path)
+
+        if os.path.isdir(path):
+            self.logger.info(f"Normalizing all audio files in directory: {path}")
+            self.task_processor.process_directory(path, temp_files=self.temp_files)
+        elif os.path.isfile(path):
+            self.logger.info(f"Normalizing single audio file: {path}")
+            task_desc, file_path, success = standalone_process_file(1, path, temp_files=self.temp_files)
+        else:
+            self.logger.error("Invalid path. Please provide a valid file or directory.")
+
+    def boost_action(self, file_path, percentage):
+        """Handle boosting for a single file."""
+        file_path = self.clean_path(file_path)
+
+        if not os.path.isfile(file_path):
+            self.logger.error("Invalid file path. Please provide a valid file.")
+            return
+
+        try:
+            percentage = float(percentage)
+            self.logger.info(f"Boosting audio file: {file_path} by {percentage}%")
+            task_desc, file_path, success = standalone_process_file(
+                3, file_path, volume_boost_percentage=percentage, temp_files=self.temp_files
+            )
+        except ValueError:
+            self.logger.error("Invalid percentage value. Please enter a valid number.")
+
+
+    def clean_path(self, path):
+        """Remove double quotes from a string path.
+
+        Args:
+            path (str): The path to clean.
+
+        Returns:
+            str: The cleaned path.
+        """
+        return path.replace('"', "")
+
+    def run(self):
+        """Run the AudioNormalizationCLI application."""
+        try:
+            if self.normalize:
+                self.normalize_action(self.normalize)
+            elif self.boost:
+                self.boost_action(self.boost[0], self.boost[1])
+            else:
+                while True:
+                    self.display_menu()
+                    choice = self.console.input("[bold cornsilk1]Enter your choice:[/bold cornsilk1] ").strip()
+                    if self.handle_option(choice) == "exit":
+                        break
+        finally:
+            self.signal_handler.cleanup_temp_files()
+
     def handle_option(self, choice):
         """Handle the user's choice from the main menu.
 
@@ -52,7 +137,7 @@ class AudioNormalizationCLI:
         Returns:
             str: The exit status.
         """
-        if choice == '1':
+        if choice == "1":
             media_path = self.console.input("[bold cornsilk1]Enter the path to the media file:[/bold cornsilk1] ").strip()
             media_path = self.clean_path(media_path)
             if not os.path.exists(media_path):
@@ -69,8 +154,8 @@ class AudioNormalizationCLI:
                 )
             except ValueError:
                 self.logger.error("Invalid percentage value. Please enter a valid number.")
-        
-        elif choice == '2':
+
+        elif choice == "2":
             media_path = self.console.input("[bold cornsilk1]Enter the path to the media file:[/bold cornsilk1] ").strip()
             media_path = self.clean_path(media_path)
             if not os.path.exists(media_path):
@@ -80,7 +165,7 @@ class AudioNormalizationCLI:
                 1, media_path, temp_files=self.temp_files
             )
 
-        elif choice == '3':
+        elif choice == "3":
             directory = self.console.input("[bold cornsilk1]Enter the path to the directory:[/bold cornsilk1] ").strip()
             directory = self.clean_path(directory)
             if not os.path.isdir(directory):
@@ -88,35 +173,25 @@ class AudioNormalizationCLI:
                 return
             self.task_processor.process_directory(directory, temp_files=self.temp_files)
 
-        elif choice == '4':
+        elif choice == "4":
             self.logger.info("Exiting program...")
             return "exit"
         else:
             self.logger.error("Invalid choice. Please try again.")
 
-    def clean_path(self, path):
-        """Remove double quotes from a string path.
-
-        Args:
-            path (str): The path to clean.
-
-        Returns:
-            str: The cleaned path.
-        """
-        return path.replace('"', "")
-
-    def run(self):
-        """Run the AudioNormalizationCLI application."""
-        try:
-            while True:
-                self.display_menu()
-                choice = self.console.input("[bold cornsilk1]Enter your choice:[/bold cornsilk1] ").strip()
-                if self.handle_option(choice) == "exit":
-                    break
-        finally:
-            self.signal_handler.cleanup_temp_files()
-
 
 if __name__ == "__main__":
-    app = AudioNormalizationCLI()
-    app.run()
+    args = parse_args()
+    
+    if args is None:
+        # No arguments provided; run interactive mode
+        app = AudioNormalizationCLI(normalize=None, boost=None)
+        app.run()
+    else:
+        # Handle command-line arguments
+        if args.normalize:
+            app = AudioNormalizationCLI(normalize=args.normalize, boost=None)
+            app.run()
+        elif args.boost:
+            app = AudioNormalizationCLI(normalize=None, boost=args.boost)
+            app.run()
