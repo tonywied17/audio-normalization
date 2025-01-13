@@ -7,12 +7,6 @@
 This project is a simple command-line tool for normalizing audio tracks in media files. It uses FFmpeg to process audio files and provides options to normalize the audio track for a single media file, normalize audio tracks for all media files in a directory, and apply a simple audio boost to a media file.
 The tool calculates the average volume level of the audio track and adjusts it to a target level, making the audio more consistent and balanced. It also supports parallel processing to speed up the normalization process for multiple files.
 
-## Features
-
-- **Normalize Audio Track for a Media File**
-- **Normalize Audio Tracks for All Media Files in a Directory**
-- **Apply Simple Audio Boost to a Media File**
-
 ## Requirements
 
 To run this project, you need the following:
@@ -47,6 +41,17 @@ pip install -r requirements.txt
 ```
 
 This will install the necessary dependencies including `rich` for terminal output and progress bars.
+
+### Normalization Parameters
+
+In the file `util/values.py`, you can adjust the following parameters:
+
+- **Integrated Loudness (I)**: The target integrated loudness level in LUFS (Loudness Units Full Scale). The default value is `-16 LUFS`.
+- **True Peak (TP)**: The target true peak level in dBFS (decibels relative to full scale). The default value is `-1.5 dBFS`.
+- **Loudness Range (LRA)**: The target loudness range in LU (Loudness Units). The default value is `11 LU`.
+
+You can adjust these parameters based on your preferences and requirements.
+
 
 ## Usage
 
