@@ -70,29 +70,13 @@ You can use the following arguments when running the tool from the command line:
 | `-n`, `--normalize`      | Path to a file or directory for normalization.                              | `python main.py -n /path/to/file`         | None      |
 | `-b`, `--boost`          | Path to a file and boost percentage (e.g., +6 for 6% increase, or -6 for 6% decrease).  | `python main.py -b /path/to/file 6`  | None      |
 
-### Launch the Interactive CLI
+### Launching the Interactive CLI Menu
 
 Run the following command to start the interactive command-line interface (CLI):
 
 ```bash
 python main.py
 ```
-
-The application will present a menu with the following options:
-
-1. **Normalize Audio Track for a Media File**  
-   Prompts for the path to a media file and normalizes its audio.
-
-2. **Normalize Audio Tracks for All Media Files in a Directory**  
-   Prompts for a directory path and processes all media files in that directory.
-
-3. **Apply Simple Audio Boost to a Media File**  
-   Prompts for the path to a media file and applies a simple audio boost.
-
-4. **Exit**  
-   Exit the program.
-
-### Example Flow
 
 After running `python main.py`, you will see a menu. Here's an example interaction:
 
