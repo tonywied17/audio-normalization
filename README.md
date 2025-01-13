@@ -78,8 +78,6 @@ Run the following command to start the interactive command-line interface (CLI):
 python main.py
 ```
 
-After running `python main.py`, you will see a menu. Here's an example interaction:
-
 #### Main Menu
 ![Menu](https://molex.cloud/files/an-repo/menu.png)
 
