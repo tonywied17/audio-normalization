@@ -49,8 +49,9 @@ Scoop also makes installing ffmpeg easy, and it automatically adds ffmpeg to you
 
     This should show you the version of `ffmpeg` that was installed.
 
-## Conclusion
-Using Scoop, both Python and ffmpeg are installed and configured with environment variables automatically. You can now use both tools from anywhere in the terminal.
+## Install Dependencies
+To run the project, you will also need to install the required Python libraries listed in `requirements.txt`. You can do this by navigating to the project directory and running:
 
-Enjoy working with Python and ffmpeg!
-
+```bash
+pip install -r requirements.txt
+```

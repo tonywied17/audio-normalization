@@ -1,5 +1,4 @@
-import os
-import sys
+import os, re, sys
 import argparse
 from rich.console import Console
 from rich.table import Table
@@ -11,28 +10,49 @@ from src.util.logger import Logger
 
 
 def parse_args():
+    """Parse command-line arguments.
+
+    Returns:
+        argparse.Namespace: The parsed arguments.
+    """
     parser = argparse.ArgumentParser(description="Audio Normalization CLI Tool")
     group = parser.add_mutually_exclusive_group()
 
-    # Normalize flag with a required path argument
+    #* Normalize flag with a required path argument
     group.add_argument("-n", "--normalize", type=str, metavar="PATH",
                        help="Path to a file or directory for normalization")
 
-    # Boost flag with a required file and percentage argument
+    #* Boost flag with a required file and percentage argument
     group.add_argument("-b", "--boost", nargs=2, metavar=("FILE", "PERCENTAGE"),
-                       help="Path to a single file and boost percentage (e.g., +6 for 6% increase)")
+                       help="Path to a single file and boost percentage (e.g., +6 for 6% increase, -6 for decrease)")
 
     args = parser.parse_args()
-    
-    # If no arguments are provided, return None for fallback to interactive mode
+
+    #* Validate that the boost percentage is valid (either +6, 6, or -6)
+    if args.boost:
+        boost_percentage = args.boost[1]
+        if not re.match(r"^[+-]?\d+$", boost_percentage):
+            print("Error: Boost percentage must be a valid integer (e.g., 6, +6, or -6).")
+            sys.exit(1)
+
+    #* If no arguments are provided, return None for fallback to interactive mode
     if not any(vars(args).values()):
         return None
     
     return args
 
 
-
 class AudioNormalizationCLI:
+    """
+    Attributes:
+    - console: Rich Console object
+    - temp_files: List of temporary files
+    - signal_handler: SignalHandler object
+    - logger: Logger object
+    - task_processor: TaskProcessor object
+    - normalize: Normalize flag
+    - boost: Boost flag
+    """
     def __init__(self, normalize=None, boost=None):
         """Initialize the AudioNormalizationCLI class."""
         self.console = Console()
@@ -99,7 +119,6 @@ class AudioNormalizationCLI:
             )
         except ValueError:
             self.logger.error("Invalid percentage value. Please enter a valid number.")
-
 
     def clean_path(self, path):
         """Remove double quotes from a string path.
@@ -184,11 +203,11 @@ if __name__ == "__main__":
     args = parse_args()
     
     if args is None:
-        # No arguments provided; run interactive mode
+        #* No arguments provided; run interactive mode
         app = AudioNormalizationCLI(normalize=None, boost=None)
         app.run()
     else:
-        # Handle command-line arguments
+        #* Handle command-line arguments
         if args.normalize:
             app = AudioNormalizationCLI(normalize=args.normalize, boost=None)
             app.run()

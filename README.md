@@ -42,6 +42,11 @@ pip install -r requirements.txt
 
 This will install the necessary dependencies including `rich` for terminal output and progress bars.
 
+## Alternative Installation Method (Using Scoop)
+
+For an easier installation with automatic environment variable setup, you can use [Scoop](https://scoop.sh/). For detailed instructions, see the [Scoop Installation Guide](scoop_installation_guide.md).
+
+
 ## Usage
 
 ### Normalization Parameters
@@ -63,8 +68,7 @@ You can use the following arguments when running the tool from the command line:
 | Argument                | Description                                                                 | Example Usage                             | Default   |
 |-------------------------|-----------------------------------------------------------------------------|-------------------------------------------|-----------|
 | `-n`, `--normalize`      | Path to a file or directory for normalization.                              | `python main.py -n /path/to/file`         | None      |
-| `-b`, `--boost`          | Path to a file and boost percentage (e.g., +6 for 6% increase).             | `python main.py -b /path/to/file 10`      | None      |
-
+| `-b`, `--boost`          | Path to a file and boost percentage (e.g., +6 for 6% increase, or -6 for 6% decrease).  | `python main.py -b /path/to/file 6`  | None      |
 
 ### Launch the Interactive CLI
 
@@ -106,9 +110,6 @@ After running `python main.py`, you will see a menu. Here's an example interacti
 #### Applying a Simple Audio Boost to a Media File
 ![Audio Boost](https://molex.cloud/files/an-repo/audio_boost.png)
 
-## Alternative Installation Method (Using Scoop)
-
-For an easier installation with automatic environment variable setup, you can use [Scoop](https://scoop.sh/). For detailed instructions, see the [Scoop Installation Guide](scoop_installation_guide.md).
 
 ## How It Works
 
