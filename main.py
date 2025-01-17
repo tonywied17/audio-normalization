@@ -8,7 +8,6 @@ from src.workers.tasks import TaskProcessor, standalone_process_file
 from src.util.signal_handler import SignalHandler
 from src.util.logger import Logger
 
-
 def parse_args():
     """Parse command-line arguments.
 
@@ -43,13 +42,10 @@ def parse_args():
         print("Error: Normalization parameters (--I, --TP, --LRA) must be used with --normalize.")
         sys.exit(1)
 
-    # Return None if no arguments are provided
     if not any(vars(args).values()):
         return None
 
     return args
-
-
 
 class AudioNormalizationCLI:
     """
@@ -207,7 +203,7 @@ class AudioNormalizationCLI:
         else:
             self.logger.error("Invalid choice. Please try again.")
 
-
+# ! --
 if __name__ == "__main__":
     from src.util.values import NORMALIZATION_PARAMS
 
@@ -222,7 +218,6 @@ if __name__ == "__main__":
         if args.LRA is not None:
             NORMALIZATION_PARAMS['LRA'] = args.LRA
 
-    #* Initialize and run the application
     if args is None:
         #* No arguments provided; run interactive mode
         app = AudioNormalizationCLI(normalize=None, boost=None)
