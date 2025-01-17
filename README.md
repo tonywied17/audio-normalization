@@ -1,3 +1,4 @@
+
 # Audio Normalization
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/tonywied17/audio-normalization?style=for-the-badge)
@@ -49,26 +50,50 @@ For an easier installation with automatic environment variable setup, you can us
 
 ## Usage
 
-### Normalization Parameters
-
-In the file `util/values.py`, you can adjust the following parameters:
-
-| Parameter | Description | Default Value |
-| --- | --- | --- |
-| Integrated Loudness (I) | The target integrated loudness level in LUFS (Loudness Units Full Scale). | `-16 LUFS` |
-| True Peak (TP) | The target true peak level in dBFS (decibels relative to full scale). | `-1.5 dBFS` |
-| Loudness Range (LRA) | The target loudness range in LU (Loudness Units). | `11 LU` |
-
-For a more detailed explanation of these parameters, refer to the [EBU R 128 Loudness Standard](r128.pdf).
-
 ### Command-Line Arguments
 
 You can use the following arguments when running the tool from the command line:
 
-| Argument                | Description                                                                 | Example Usage                               |
-|-------------------------|-----------------------------------------------------------------------------|---------------------------------------------|
-| `-n`, `--normalize`      | Path to a file or directory for normalization.                              | `python main.py -n /path/to/file`         |
-| `-b`, `--boost`          | Path to a file and boost percentage (e.g., +6 for 6% increase, or -6 for 6% decrease).  | `python main.py -b /path/to/file 6`  |
+| Argument                | Description                                                                                       | Example Usage                             |
+|-------------------------|---------------------------------------------------------------------------------------------------|-------------------------------------------|
+| `-n`, `--normalize`      | Path to a file or directory for normalization.                                                    | `python main.py -n /path/to/file`         |
+| `--I`                   | (Optional, with `--normalize`) Integrated loudness target in LUFS. Default: `-16`.               | `python main.py -n /path/to/file --I -20` |
+| `--TP`                  | (Optional, with `--normalize`) True peak target in dBFS. Default: `-1.5`.                        | `python main.py -n /path/to/file --TP -2` |
+| `--LRA`                 | (Optional, with `--normalize`) Loudness range target in LU. Default: `11`.                       | `python main.py -n /path/to/file --LRA 10` |
+| `-b`, `--boost`          | Path to a file and boost percentage (e.g., +6 for 6% increase, or -6 for 6% decrease).           | `python main.py -b /path/to/file 6`       |
+
+#### Notes:
+- The `--I`, `--TP`, and `--LRA` arguments are optional and can only be used with `--normalize`.
+- If no values are provided for `--I`, `--TP`, or `--LRA`, the tool will use the default normalization parameters specified in `values.py`.
+
+### Examples
+
+#### Normalize a Single File with Default Parameters:
+```bash
+python main.py -n /path/to/file
+```
+
+#### Normalize a Directory with Custom Parameters:
+```bash
+python main.py -n /path/to/directory --I -18 --TP -2 --LRA 9
+```
+
+#### Apply Audio Boost to a File:
+```bash
+python main.py -b /path/to/file 10
+```
+
+### Normalization Parameters
+
+In the file `util/values.py`, you can adjust the following parameters manually (if desired):
+
+| Parameter               | Description                                                                   | Default Value |
+|-------------------------|-------------------------------------------------------------------------------|---------------|
+| Integrated Loudness (I) | The target integrated loudness level in LUFS (Loudness Units Full Scale).     | `-16 LUFS`    |
+| True Peak (TP)          | The target true peak level in dBFS (decibels relative to full scale).         | `-1.5 dBFS`   |
+| Loudness Range (LRA)    | The target loudness range in LU (Loudness Units).                            | `11 LU`       |
+
+For a more detailed explanation of these parameters, refer to the [EBU R 128 Loudness Standard](r128.pdf).
 
 ### Launching the Interactive CLI Menu
 
