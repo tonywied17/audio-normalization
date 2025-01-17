@@ -79,7 +79,7 @@ class AudioProcessor:
             if not audio_streams:
                 raise Exception("No audio streams found in the media.")
 
-            self.logger.info(f"Analyzing loudness for audio normalization.\n\n[bold]File:[/bold] {media_path}\n[bold]Audio Tracks:[/bold] {len(audio_streams)}")
+            self.logger.info(f"Analyzing loudness for audio normalization.\n\n[bold]File:[/bold] {media_path}\n[bold]Audio Tracks:[/bold] {len(audio_streams)}\n\nNormalization Parameters:\n{json.dumps(NORMALIZATION_PARAMS, indent=4)}")
             loudness_metadata = []
             for i in range(len(audio_streams)):
                 first_pass_command = [

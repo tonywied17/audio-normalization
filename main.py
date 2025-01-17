@@ -18,7 +18,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Audio Normalization CLI Tool")
     group = parser.add_mutually_exclusive_group()
 
-    #* Normalize flag with a required path argument
+    # *Normalize flag with a required path argument
     group.add_argument("-n", "--normalize", type=str, metavar="PATH",
                        help="Path to a file or directory for normalization")
 
@@ -26,20 +26,29 @@ def parse_args():
     group.add_argument("-b", "--boost", nargs=2, metavar=("FILE", "PERCENTAGE"),
                        help="Path to a single file and boost percentage (e.g., +6 for 6% increase, -6 for decrease)")
 
+    #* Parameters for normalization (only valid with --normalize)
+    parser.add_argument("--I", type=float, default=None, help="Integrated loudness target (e.g., -16)")
+    parser.add_argument("--TP", type=float, default=None, help="True peak target (e.g., -1.5)")
+    parser.add_argument("--LRA", type=float, default=None, help="Loudness range target (e.g., 11)")
+
     args = parser.parse_args()
 
-    #* Validate that the boost percentage is valid (either +6, 6, or -6)
-    if args.boost:
-        boost_percentage = args.boost[1]
-        if not re.match(r"^[+-]?\d+$", boost_percentage):
-            print("Error: Boost percentage must be a valid integer (e.g., 6, +6, or -6).")
-            sys.exit(1)
+    #* Validate that boost and normalization parameters are mutually exclusive
+    if args.boost and (args.I is not None or args.TP is not None or args.LRA is not None):
+        print("Error: Normalization parameters (--I, --TP, --LRA) cannot be used with --boost.")
+        sys.exit(1)
 
-    #* If no arguments are provided, return None for fallback to interactive mode
+    #* Validate that normalization parameters are only used with --normalize
+    if args.normalize is None and (args.I is not None or args.TP is not None or args.LRA is not None):
+        print("Error: Normalization parameters (--I, --TP, --LRA) must be used with --normalize.")
+        sys.exit(1)
+
+    # Return None if no arguments are provided
     if not any(vars(args).values()):
         return None
-    
+
     return args
+
 
 
 class AudioNormalizationCLI:
@@ -200,8 +209,20 @@ class AudioNormalizationCLI:
 
 
 if __name__ == "__main__":
+    from src.util.values import NORMALIZATION_PARAMS
+
     args = parse_args()
-    
+
+    #* Update normalization parameters dynamically if --normalize is used
+    if args and args.normalize:
+        if args.I is not None:
+            NORMALIZATION_PARAMS['I'] = args.I
+        if args.TP is not None:
+            NORMALIZATION_PARAMS['TP'] = args.TP
+        if args.LRA is not None:
+            NORMALIZATION_PARAMS['LRA'] = args.LRA
+
+    #* Initialize and run the application
     if args is None:
         #* No arguments provided; run interactive mode
         app = AudioNormalizationCLI(normalize=None, boost=None)
