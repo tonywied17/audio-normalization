@@ -115,7 +115,7 @@ class AudioNormalizationCLI:
             border_style="bright_cyan"
         )
         menu_table.add_column("[bold cyan]Option[/bold cyan]", justify="center", style="bold cyan", width=10)
-        menu_table.add_column("[bold magenta]Description[/bold magenta]", justify="left", style="white")
+        menu_table.add_column("[bold cyan]Description[/bold cyan]", justify="left", style="white")
         menu_table.add_row("[1]", "[white]Apply [bold green]Simple Audio Boost[/bold green] to a File or Directory[/white]")
         menu_table.add_row("[2]", "[white]Normalize [bold cyan]Audio Track(s)[/bold cyan] for a File or Directory[/white]")
         menu_table.add_row("[3]", "[white][bold red]Exit[/bold red][/white]")
