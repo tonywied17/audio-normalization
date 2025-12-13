@@ -58,8 +58,8 @@ python main.py
 ```
 
 #### Menu Screenshots
-![Menu](https://molex.cloud/files/an-repo/menu.png)
-![Normalize Directory Analyzing](https://molex.cloud/files/an-repo/normalize_directory_1.png)
+![Menu](https://molex.cloud/files/an-repo/menu1.png)
+![Normalize Directory Analyzing](https://molex.cloud/files/an-repo/normalize_audio1.png)
 
 ### Command-Line Arguments
 
