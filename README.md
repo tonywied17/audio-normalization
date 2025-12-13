@@ -1,11 +1,10 @@
-
 # Audio Normalization
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/tonywied17/audio-normalization?style=for-the-badge)
 ![GitHub language count](https://img.shields.io/github/languages/top/tonywied17/audio-normalization?style=for-the-badge)
 ![GitHub last commit](https://img.shields.io/github/last-commit/tonywied17/audio-normalization?style=for-the-badge)
 
-This project is a simple command-line tool for normalizing audio tracks in media files. It uses FFmpeg to process audio files and provides options to normalize the audio track for a single media file, normalize audio tracks for all media files in a directory, and apply a simple audio boost to a media file.
+This project is a simple command-line tool for normalizing and boosting audio tracks in media files. It is designed to help users achieve consistent audio levels across different media files.
 The tool calculates the average volume level of the audio track and adjusts it to a target level, making the audio more consistent and balanced. It also supports parallel processing to speed up the normalization process for multiple files.
 
 ## Requirements
@@ -50,6 +49,25 @@ For an easier installation with automatic environment variable setup, you can us
 
 ## Usage
 
+### Interactive CLI Menu
+
+You can also launch the interactive CLI menu, which now supports both normalization and boosting for single files and directories, with a modern UI and live per-file progress:
+
+```bash
+python main.py
+```
+
+#### Main Menu
+![Menu](https://molex.cloud/files/an-repo/menu.png)
+
+#### Normalizing Audio Tracks for a Single File or Directory
+![Normalize Directory Analyzing](https://molex.cloud/files/an-repo/normalize_directory_1.png)
+![Normalize Directory Complete](https://molex.cloud/files/an-repo/normalize_directory_2.png)
+
+#### Applying a Simple Audio Boost to a Single File or Directory
+![Audio Boost](https://molex.cloud/files/an-repo/audio_boost.png)
+![Audio Boost Complete](https://molex.cloud/files/an-repo/audio_boost_complete.png)
+
 ### Command-Line Arguments
 
 You can use the following arguments when running the tool from the command line:
@@ -60,17 +78,21 @@ You can use the following arguments when running the tool from the command line:
 | `--I`                   | (Optional, with `--normalize`) Integrated loudness target in LUFS. Default: `-16`.               | `python main.py -n /path/to/file --I -20` |
 | `--TP`                  | (Optional, with `--normalize`) True peak target in dBFS. Default: `-1.5`.                        | `python main.py -n /path/to/file --TP -2` |
 | `--LRA`                 | (Optional, with `--normalize`) Loudness range target in LU. Default: `11`.                       | `python main.py -n /path/to/file --LRA 10` |
-| `-b`, `--boost`          | Path to a file and boost percentage (e.g., +6 for 6% increase, or -6 for 6% decrease).           | `python main.py -b /path/to/file 6`       |
+| `-b`, `--boost`          | Path to a file or directory and boost percentage (e.g., 10 for +10%, -10 for -10%).              | `python main.py -b /path/to/file 10` or `python main.py -b /path/to/dir 5` |
 
 #### Notes:
 - The `--I`, `--TP`, and `--LRA` arguments are optional and can only be used with `--normalize`.
 - If no values are provided for `--I`, `--TP`, or `--LRA`, the tool will use the default normalization parameters specified in `values.py`.
+- The `--boost` argument now supports both files and directories. When a directory is provided, all supported files inside will be boosted by the given percentage, with live progress and per-file status.
+ - The `--boost` argument now supports both files and directories. When a directory is provided, all supported files inside will be boosted by the given percentage, with live progress and per-file status.
+ - `--dry-run`: Build and show FFmpeg commands without executing them. Useful for debugging commands before running.
+ - `--workers`: Set maximum parallel worker threads for batch processing. Defaults to auto-detected CPU count.
 
 ### Examples
 
 #### Normalize a Single File with Default Parameters:
 ```bash
-python main.py -n /path/to/file
+python main.py -n /path/to/file.mkv
 ```
 
 #### Normalize a Directory with Custom Parameters:
@@ -80,54 +102,16 @@ python main.py -n /path/to/directory --I -18 --TP -2 --LRA 9
 
 #### Apply Audio Boost to a File:
 ```bash
-python main.py -b /path/to/file 10
+python main.py -b /path/to/file.mkv 10
 ```
 
-### Normalization Parameters
-
-In the file `util/values.py`, you can adjust the following parameters manually (if desired):
-
-| Parameter               | Description                                                                   | Default Value |
-|-------------------------|-------------------------------------------------------------------------------|---------------|
-| Integrated Loudness (I) | The target integrated loudness level in LUFS (Loudness Units Full Scale).     | `-16 LUFS`    |
-| True Peak (TP)          | The target true peak level in dBFS (decibels relative to full scale).         | `-1.5 dBFS`   |
-| Loudness Range (LRA)    | The target loudness range in LU (Loudness Units).                            | `11 LU`       |
-
-For a more detailed explanation of these parameters, refer to the [EBU R 128 Loudness Standard](r128.pdf).
-
-### Launching the Interactive CLI Menu
-
-Run the following command to start the interactive command-line interface (CLI):
-
+#### Apply Audio Boost to All Files in a Directory:
 ```bash
-python main.py
+python main.py -b /path/to/directory 5
 ```
-
-#### Main Menu
-![Menu](https://molex.cloud/files/an-repo/menu.png)
-
-#### Normalizing an Audio Track for a Media File
-![Normalize File](https://molex.cloud/files/an-repo/normalize_file.png)
-![Normalize File Complete](https://molex.cloud/files/an-repo/normalize_file_complete.png)
-
-#### Normalizing Audio Tracks for All Media Files in a Directory
-![Normalize Directory](https://molex.cloud/files/an-repo/normalize_directory.png)
-![Normalize Directory Table](https://molex.cloud/files/an-repo/normalize_directory_table.png)
-
-#### Applying a Simple Audio Boost to a Media File
-![Audio Boost](https://molex.cloud/files/an-repo/audio_boost.png)
-
 
 ## How It Works
 
-1. **Normalization**: The tool normalizes the audio track of a media file by calculating the average volume level and adjusting the audio to a target level. This helps to balance the audio and make it more consistent across different tracks.
-2. **Audio Boost**: The tool can also apply a simple audio boost to increase (or decrease) the volume level of a media file. This is useful when the audio is too low and needs to be amplified.
-3. **Parallel Processing**: The tool uses parallel processing to speed up the normalization process for multiple files. This allows it to process multiple files simultaneously, making the normalization faster and more efficient.
-
-## Development
-
-If you want to contribute or modify the code, clone the repository and install the dependencies as described above. You can also add new features or improvements as needed.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+1. **Normalization**: The tool analyzes the audio track of the specified media file(s) to determine the current loudness levels. It then calculates the necessary adjustments to bring the audio to the target levels defined by the user (or defaults). The tool uses FFmpeg to apply these adjustments and create a new normalized audio track.
+2. **Audio Boost**: The tool can also apply a simple audio boost by increasing the volume of the audio track by a specified percentage. This is useful for making quiet audio tracks louder without performing full normalization.
+3. **Parallel Processing**: The tool supports parallel processing, allowing multiple files to be processed simultaneously. This significantly speeds up the normalization and boosting process when dealing with large batches of files.

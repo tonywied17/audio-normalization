@@ -1,0 +1,86 @@
+"""
+Argument parsing and validation for Audio Normalization CLI Tool.
+"""
+
+import sys
+import argparse
+from src.config import NORMALIZATION_PARAMS
+
+def parse_args():
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(description="Audio Normalization CLI Tool")
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-n", "--normalize",
+        type=str,
+        metavar="PATH",
+        help="Path to a file or directory for normalization"
+    )
+    group.add_argument(
+        "-b", "--boost",
+        nargs='+',
+        metavar=("PATH", "PERCENTAGE"),
+        help="Path to a file or directory and boost percentage (e.g., 10 for +10%%, -10 for -10%%). If a directory is given, all supported files will be boosted."
+    )
+
+    # Batch processing options
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Build FFmpeg commands and show them without executing (useful for debugging)"
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Maximum number of concurrent worker threads to use for batch processing (default: auto-detect)"
+    )
+
+    # Normalization parameters
+    parser.add_argument(
+        "--I",
+        type=float,
+        default=None,
+        help="Integrated loudness target (LUFS)"
+    )
+    parser.add_argument(
+        "--TP",
+        type=float,
+        default=None,
+        help="True peak target (dBFS)"
+    )
+    parser.add_argument(
+        "--LRA",
+        type=float,
+        default=None,
+        help="Loudness range target (LU)"
+    )
+
+    args = parser.parse_args()
+
+    # Validate mutually exclusive options
+    if args.boost and any(x is not None for x in [args.I, args.TP, args.LRA]):
+        print("Error: Normalization parameters cannot be used with --boost")
+        sys.exit(1)
+
+    if args.normalize is None and any(x is not None for x in [args.I, args.TP, args.LRA]):
+        print("Error: Normalization parameters require --normalize")
+        sys.exit(1)
+
+    # Validate boost arguments
+    if args.boost:
+        if len(args.boost) != 2:
+            print("Error: --boost requires a path and a percentage (e.g., --boost <file_or_dir> <percent>)")
+            sys.exit(1)
+        try:
+            float(args.boost[1])
+        except ValueError:
+            print("Error: Boost percentage must be a number.")
+            sys.exit(1)
+
+    if not any(vars(args).values()):
+        return None
+
+    return args
+
