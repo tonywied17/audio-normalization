@@ -57,18 +57,9 @@ You can also launch the interactive CLI menu, which now supports both normalizat
 python main.py
 ```
 
-#### Main Menu
+#### Menu Screenshots
 ![Menu](https://molex.cloud/files/an-repo/menu.png)
-
-#### Normalizing Audio Tracks for a Single File or Directory
 ![Normalize Directory Analyzing](https://molex.cloud/files/an-repo/normalize_directory_1.png)
-
-![Normalize Directory Complete](https://molex.cloud/files/an-repo/normalize_directory_2.png)
-
-#### Applying a Simple Audio Boost to a Single File or Directory
-![Audio Boost](https://molex.cloud/files/an-repo/audio_boost.png)
-
-![Audio Boost Complete](https://molex.cloud/files/an-repo/audio_boost_complete.png)
 
 ### Command-Line Arguments
 

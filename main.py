@@ -14,14 +14,14 @@ from src.config import NORMALIZATION_PARAMS
 def run_interactive(cli: AudioNormalizationCLI, handler: CommandHandler, signal_handler: SignalHandler):
     while True:
         cli.display_menu()
-        choice = cli.console.input("[bold cornsilk1]Enter choice: [/bold cornsilk1]").strip()
+        choice = cli.console.input("[bold wheat1]Enter choice: [/bold wheat1]").strip()
         if choice == "1":
-            path = cli.console.input("Enter file or directory path: ").strip()
-            percentage = cli.console.input("Enter boost percentage: ").strip()
+            path = cli.console.input("[bold wheat1]Enter file or directory path: [/bold wheat1]").strip()
+            percentage = cli.console.input("[bold wheat1]Enter boost percentage: [/bold wheat1]").strip()
             results = handler.handle_boost(path, percentage)
             cli.display_results(results)
         elif choice == "2":
-            path = cli.console.input("Enter file or directory path: ").strip()
+            path = cli.console.input("[bold wheat1]Enter file or directory path: [/bold wheat1]").strip()
             import os
             if os.path.exists(path):
                 results = handler.handle_normalize(path)

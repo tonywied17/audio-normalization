@@ -39,7 +39,7 @@ class Logger:
 
     def _print_to_console(self, level: LogLevel, message: str):
         if level == LogLevel.INFO:
-            self.console.print(message, style="cyan", markup=False, emoji=False)
+            self.console.print(message, style="dim bright_white", markup=False, emoji=False)
         elif level == LogLevel.ERROR:
             self.console.print(message, style="red", markup=False, emoji=False)
         elif level == LogLevel.SUCCESS:
