@@ -117,12 +117,12 @@ class BatchProcessor:
                 ffmpeg_command_str = ' '.join(ffmpeg_cmd)
                 self.logger.info(f"FFmpeg command: {ffmpeg_command_str}")
                 try:
-                    with open("process.log", "a", encoding="utf-8") as logf:
+                    with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                         logf.write(f"\n[BOOST_CMD_ARGS] {file}:\n{repr(ffmpeg_cmd)}\n")
                 except Exception:
                     pass
                 try:
-                    with open("process.log", "a", encoding="utf-8") as logf:
+                    with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                         logf.write(f"\n[BOOST_CMD] {file}:\n{ffmpeg_command_str}\n")
                 except Exception:
                     pass
@@ -157,7 +157,7 @@ class BatchProcessor:
                     pass
                 if process.returncode != 0:
                     try:
-                        with open("process.log", "a", encoding="utf-8") as logf:
+                        with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                             logf.write(f"\n[BOOST] {file}:\n" + "\n".join(ffmpeg_log) + "\n")
                     except Exception:
                         pass
@@ -313,38 +313,7 @@ class BatchProcessor:
         import time
         import subprocess, re, json
         audio_tracks = get_audio_track_count(input_path)
-        def run_ffmpeg_with_ui(stage, ffmpeg_cmd, spinner=None, live=None, update_panel=None, title=None):
-            try:
-                process = subprocess.Popen(ffmpeg_cmd, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL, text=True, encoding="utf-8")
-                ffmpeg_log = []
-                for line in process.stderr:
-                    last_line = line.strip()
-                    ffmpeg_log.append(last_line)
-                    if update_panel:
-                        update_panel(stage, last_line=last_line)
-                    elif spinner and live:
-                        if last_line:
-                            spinner.text = Text.from_markup(f"[bold bright_blue]{stage.title()} {audio_tracks} audio track{'s' if audio_tracks != 1 else ''}...[/bold bright_blue]\n{last_line}")
-                        else:
-                            spinner.text = Text.from_markup(f"[bold bright_blue]{stage.title()} {audio_tracks} audio track{'s' if audio_tracks != 1 else ''}...[/bold bright_blue]")
-                        live.update(Panel(spinner, title=title, border_style="bright_blue"))
-                process.wait()
-                if process.returncode != 0:
-                    try:
-                            with open("process.log", "a", encoding="utf-8") as logf:
-                                logf.write(f"\n[{stage.upper()}] {(title or 'file')}:\n" + "\n".join(ffmpeg_log) + "\n")
-                    except Exception as log_e:
-                        self.logger.error(f"Failed to write ffmpeg log: {log_e}")
-                    self.logger.error(f"FFmpeg {stage} failed for {title or 'file'}: {'; '.join(ffmpeg_log[-1:] or ['Unknown error'])}")
-                return process.returncode == 0
-            except Exception as e:
-                if update_panel:
-                    update_panel(stage, last_line=str(e), error=True)
-                elif spinner and live:
-                    spinner.text = Text.from_markup(f"[red]{stage.title()} failed: {e}[/red]")
-                    live.update(Panel(spinner, title=title, border_style="red"))
-                return False
-
+        
         if update_panel:
             audio_streams = self.audio_processor._get_audio_streams(input_path)
             if not audio_streams:
@@ -414,9 +383,6 @@ class BatchProcessor:
             return True
         else:
 
-            if console:
-                console.print(f"Found [bold cyan]{audio_tracks}[/bold cyan] audio track{'s' if audio_tracks != 1 else ''} in file.")
-
             video_streams = self.audio_processor._get_video_streams(input_path)
             loudness_data = []
             with Live(console=console, refresh_per_second=8) as live:
@@ -437,7 +403,7 @@ class BatchProcessor:
                         self.logger.error(f"ffprobe stdout: {proc.stdout}")
                         self.logger.error(f"ffprobe stderr: {proc.stderr}")
                         try:
-                            with open("process.log", "a", encoding="utf-8") as logf:
+                            with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                                 logf.write(f"\n[FFPROBE] {input_path}:\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}\n")
                         except Exception:
                             pass
@@ -577,7 +543,7 @@ class BatchProcessor:
                         self.logger.error(f"ffprobe stdout: {proc.stdout}")
                         self.logger.error(f"ffprobe stderr: {proc.stderr}")
                         try:
-                            with open("process.log", "a", encoding="utf-8") as logf:
+                            with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                                 logf.write(f"\n[FFPROBE] {file}:\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}\n")
                         except Exception:
                             pass
@@ -596,10 +562,10 @@ class BatchProcessor:
                     ]
                     process = subprocess.run(analyze_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
                     try:
-                        with open("process.log", "a", encoding="utf-8") as logf:
+                        with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                             logf.write(f"\n[ANALYZE] {file} stream {i+1}:\n{process.stderr}\n")
                     except Exception as log_e:
-                        self.logger.error(f"Failed to write to process.log: {log_e}")
+                        self.logger.error(f"Failed to write to logs/ffmpeg_debug.log: {log_e}")
                         self.logger.error(f"FFmpeg stderr: {process.stderr}")
                     match = re.search(r'\{.*\}', process.stderr, re.DOTALL)
                     if not match:
@@ -631,7 +597,6 @@ class BatchProcessor:
                         f"[a{i}]"
                     )
                 temp_output = self.audio_processor._create_temp_file(file)
-                # Debug logging
                 self.logger.info(f"Audio streams: {audio_streams}")
                 self.logger.info(f"Filter complex: {';'.join(filter_parts)}")
                 ffmpeg_cmd = [
@@ -662,10 +627,10 @@ class BatchProcessor:
                     update_panel("normalizing", last_line=last_line)
                 process.wait()
                 try:
-                    with open("process.log", "a", encoding="utf-8") as logf:
+                    with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                         logf.write(f"\n[NORMALIZE] {file}:\n" + "\n".join(ffmpeg_log) + "\n")
                 except Exception as log_e:
-                    self.logger.error(f"Failed to write to process.log: {log_e}")
+                    self.logger.error(f"Failed to write to logs/ffmpeg_debug.log: {log_e}")
                     joined = "\n".join(ffmpeg_log)
                     self.logger.error(f"FFmpeg stderr: {joined}")
                 if process.returncode != 0:
@@ -673,7 +638,6 @@ class BatchProcessor:
                     statuses[idx] = "failed"
                     results[idx] = {"file": file, "task": "Normalize Audio", "status": "Failed"}
                     return
-                # Replace original file
                 final_path = file
                 if os.path.exists(final_path):
                     os.remove(final_path)

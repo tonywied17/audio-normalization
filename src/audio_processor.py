@@ -265,21 +265,19 @@ class AudioProcessor:
                 from rich.panel import Panel
                 from rich.text import Text
                 console = Console()
-                console.print(f"Found [bold magenta]{len(audio_streams)}[/bold magenta] audio track{'s' if len(audio_streams) != 1 else ''} in file.")
                 with Live(console=console, refresh_per_second=8) as live:
                     spinner = Spinner("dots", text=Text.from_markup(f"[bold green]Boosting {len(audio_streams)} audio track{'s' if len(audio_streams) != 1 else ''} by {boost_percent}%...[/bold green]"), style="green")
                     live.update(Panel(spinner, title="Boosting audio", border_style="green"))
                     import subprocess
                     ffmpeg_command_str = ' '.join(ffmpeg_cmd)
                     self.logger.info(f"FFmpeg command: {ffmpeg_command_str}")
-                    # Also persist the exact argv list representation to aid debugging of missing args
                     try:
-                        with open("logs/process.log", "a", encoding="utf-8") as logf:
+                        with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                             logf.write(f"\n[BOOST_CMD_ARGS] {media_path}:\n{repr(ffmpeg_cmd)}\n")
                     except Exception:
                         pass
                     try:
-                        with open("logs/process.log", "a", encoding="utf-8") as logf:
+                        with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                             logf.write(f"\n[BOOST_CMD] {media_path}:\n{ffmpeg_command_str}\n")
                     except Exception:
                         pass
@@ -309,7 +307,7 @@ class AudioProcessor:
                     if process.returncode != 0:
                         # persist ffmpeg log for debugging
                         try:
-                            with open("logs/process.log", "a", encoding="utf-8") as logf:
+                            with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                                 logf.write(f"\n[BOOST] {media_path}:\n" + "\n".join(ffmpeg_log) + "\n")
                         except Exception:
                             pass
@@ -322,12 +320,12 @@ class AudioProcessor:
                 ffmpeg_command_str = ' '.join(ffmpeg_cmd)
                 self.logger.info(f"FFmpeg command: {ffmpeg_command_str}")
                 try:
-                    with open("logs/process.log", "a", encoding="utf-8") as logf:
+                    with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                         logf.write(f"\n[BOOST_CMD_ARGS] {media_path}:\n{repr(ffmpeg_cmd)}\n")
                 except Exception:
                     pass
                 try:
-                    with open("logs/process.log", "a", encoding="utf-8") as logf:
+                    with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                         logf.write(f"\n[BOOST_CMD] {media_path}:\n{ffmpeg_command_str}\n")
                 except Exception:
                     pass
@@ -352,7 +350,7 @@ class AudioProcessor:
                     pass
                 if process.returncode != 0:
                     try:
-                        with open("logs/process.log", "a", encoding="utf-8") as logf:
+                        with open("logs/ffmpeg_debug.log", "a", encoding="utf-8") as logf:
                             logf.write(f"\n[BOOST] {media_path}:\n" + "\n".join(ffmpeg_log) + "\n")
                     except Exception:
                         pass

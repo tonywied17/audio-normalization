@@ -21,9 +21,7 @@ class AudioNormalizationCLI:
         import platform
         import os
         import shutil
-        config_color = "grey42"
         config_title_style = "dim wheat1"
-        config_border_style = config_color
 
         # Normalization params panel
         norm_table = Table.grid(padding=(0,1))
@@ -32,7 +30,6 @@ class AudioNormalizationCLI:
         norm_table.add_row("Integrated Loudness (I)", f"[white]{NORMALIZATION_PARAMS['I']} LUFS[/white]")
         norm_table.add_row("True Peak (TP)", f"[white]{NORMALIZATION_PARAMS['TP']} dBFS[/white]")
         norm_table.add_row("Loudness Range (LRA)", f"[white]{NORMALIZATION_PARAMS['LRA']} LU[/white]")
-        # Borderless grouping that preserves panel padding and spacing (centered)
         norm_panel = Align.center(
             Group(
                 Align.center(Text("Normalization Params", style=config_title_style)),
@@ -59,6 +56,8 @@ class AudioNormalizationCLI:
         log_table.add_column(justify="left", style="white")
         log_table.add_row("Log Directory", f"[white]{LOG_DIR}[/white]")
         log_table.add_row("Log File", f"[white]{LOG_FILE}[/white]")
+        ffmpeg_log_path = "ffmpeg_debug.log"
+        log_table.add_row("FFmpeg Debug Log", f"[white]{ffmpeg_log_path}[/white]")
         log_panel = Align.center(
             Group(
                 Align.center(Text("Logging", style=config_title_style)),
@@ -122,7 +121,6 @@ class AudioNormalizationCLI:
         subtitle = Text.assemble(("by molex | ", "dim"), (f"v{VERSION}", "dim"))
         subtitle.justify = "center"
 
-        # Compute a responsive menu width based on terminal size, defaulting to 60
         terminal_cols = shutil.get_terminal_size(fallback=(80, 24)).columns
         menu_width = min(80, max(40, int(terminal_cols * 0.35)))
         layout = Layout()
@@ -131,7 +129,7 @@ class AudioNormalizationCLI:
             Layout(Align.center(subtitle), name="subtitle", size=2),
             Layout(name="main", ratio=1)
         )
-        # Place the menu table directly (no outer panel/title) and the config columns
+
         layout["main"].split_row(
             Layout(Align.left(menu_table, vertical="top"), name="menu", size=menu_width),
             Layout(config_group, name="config")
