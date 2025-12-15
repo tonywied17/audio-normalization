@@ -64,12 +64,12 @@ class BatchProcessor:
         results: List[Dict[str, Any]] = []
         results_lock = threading.Lock()
 
-        # Prepare UI slots equal to worker_count
+        # prepare UI slots equal to worker_count
         panels = [None] * worker_count
         spinners = [Spinner("dots", "pending") for _ in range(worker_count)]
         live_ref = {"live": None}
 
-        # Pool of available slot indices
+        # pool of available slot indices
         slot_queue: Queue = Queue()
         for i in range(worker_count):
             slot_queue.put(i)
@@ -188,7 +188,7 @@ class BatchProcessor:
                     update_cb("boosting", last_line=None)
                 except Exception:
                     pass
-                res = bp_worker.boost_file(self.audio_processor, file_path, boost_percent, dry_run=dry_run, show_ui=False)
+                res = bp_worker.boost_file(self.audio_processor, file_path, boost_percent, dry_run=dry_run, show_ui=False, progress_callback=update_cb)
                 try:
                     if res.get("success"):
                         update_cb("success")

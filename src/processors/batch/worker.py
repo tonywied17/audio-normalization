@@ -5,12 +5,12 @@ Core processing functions for individual files (normalize / boost).
 from typing import Dict, Any
 
 
-def boost_file(audio_processor, file_path: str, boost_percent: float, dry_run: bool = False, show_ui: bool = False) -> Dict[str, Any]:
+def boost_file(audio_processor, file_path: str, boost_percent: float, dry_run: bool = False, show_ui: bool = False, progress_callback=None) -> Dict[str, Any]:
     """Boost a single audio file."""
     if dry_run:
         return {"success": True, "message": "Dry Run"}
     try:
-        res = audio_processor.boost_audio(file_path, boost_percent, show_ui=show_ui, dry_run=dry_run)
+        res = audio_processor.boost_audio(file_path, boost_percent, show_ui=show_ui, dry_run=dry_run, progress_callback=progress_callback)
         if res:
             return {"success": True}
         return {"success": False, "message": "Boost failed"}

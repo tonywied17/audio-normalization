@@ -33,7 +33,7 @@ class AudioNormalizationCLI:
             ffmpeg_path = None
         self.ffmpeg_found = bool(ffmpeg_path)
         if ffmpeg_path:
-            ffmpeg_status = "[green]Found[/green]"
+            ffmpeg_status = "[dim green]Found[/dim green]"
             ffmpeg_link = ""
         else:
             ffmpeg_status = "[red]Not found[/red]"
@@ -158,26 +158,33 @@ class AudioNormalizationCLI:
 
 
     def display_results(self, results: list):
-        """Display processing results in a table."""
+        """Display processing results using a panel-per-file layout with a summary."""
         if not results:
+            self.console.print("[bold yellow]No results to display[/bold yellow]")
             return
-        table = Table(
-            title="📋 Processing Results",
-            title_style="bold green",
-            show_header=True,
-            header_style="bold magenta",
-            box=box.SIMPLE,
-            expand=True,
-            style="cyan"
-        )
-        table.add_column("File", style="dim white")
-        table.add_column("Task", justify="center", style="italic white")
-        table.add_column("Status", justify="center", style="bold")
-        for result in results:
-            status_color = "green" if result["status"] == "Success" else "red"
-            table.add_row(
-                result["file"],
-                result["task"],
-                f"[{status_color}]{result['status']}[/{status_color}]"
-            )
-        self.console.print(table)
+        total = len(results)
+        succeeded = sum(1 for r in results if r.get("status") == "Success")
+        failed = total - succeeded
+
+        summary = Text.assemble((f"{succeeded}", "bold green"), (" succeeded ", "dim"), ("• ", "dim"), (f"{failed}", "bold red"), (" failed", "dim"))
+        self.console.rule("[bold cyan]Processing Complete[/bold cyan]")
+        self.console.print(Align.center(summary))
+
+        panels = []
+        for r in results:
+            file_name = os.path.basename(r.get("file", ""))
+            task = r.get("task", "")
+            status = r.get("status", "")
+            status_color = "green" if status == "Success" else "red"
+            message = r.get("message", "")
+
+            body = Text()
+            body.append(f"{task}\n", style="bold white")
+            body.append(f"[{status_color}]{status}[/{status_color}]\n")
+            if message:
+                body.append("\n")
+                body.append(message, style="dim")
+
+            panels.append(Panel(body, title=file_name, border_style=status_color, padding=(1,2)))
+
+        self.console.print(Columns(panels, equal=True, expand=True))

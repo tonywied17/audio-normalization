@@ -50,11 +50,39 @@ class AudioProcessor:
                     "-af", f"loudnorm=I={NORMALIZATION_PARAMS['I']}:TP={NORMALIZATION_PARAMS['TP']}:LRA={NORMALIZATION_PARAMS['LRA']}:print_format=json",
                     "-f", "null", "-"
                 ]
-                result = run_command(analyze_cmd)
-                match = re.search(r'\{.*\}', result.stderr, re.DOTALL)
-                if not match:
-                    raise ValueError(f"Failed to get loudness data for stream {i}")
-                loudness_data.append(json.loads(match.group()))
+                if progress_callback:
+                    process = popen(analyze_cmd)
+                    ffmpeg_log = []
+                    try:
+                        SignalHandler.register_child_pid(process.pid)
+                    except Exception:
+                        pass
+                    try:
+                        for line in process.stderr:
+                            last_line = line.strip()
+                            ffmpeg_log.append(last_line)
+                            if last_line:
+                                try:
+                                    progress_callback("analyzing", last_line=last_line)
+                                except Exception:
+                                    pass
+                        process.wait()
+                    finally:
+                        try:
+                            SignalHandler.unregister_child_pid(process.pid)
+                        except Exception:
+                            pass
+                    stderr_output = "\n".join(ffmpeg_log)
+                    match = re.search(r'\{.*\}', stderr_output, re.DOTALL)
+                    if not match:
+                        raise ValueError(f"Failed to get loudness data for stream {i}")
+                    loudness_data.append(json.loads(match.group()))
+                else:
+                    result = run_command(analyze_cmd)
+                    match = re.search(r'\{.*\}', result.stderr, re.DOTALL)
+                    if not match:
+                        raise ValueError(f"Failed to get loudness data for stream {i}")
+                    loudness_data.append(json.loads(match.group()))
 
             if progress_callback:
                 try:
@@ -103,7 +131,44 @@ class AudioProcessor:
                     progress_callback("normalizing")
                 except Exception:
                     pass
-            run_command(ffmpeg_cmd, capture_output=(not show_ui))
+            if progress_callback:
+                process = popen(ffmpeg_cmd)
+                ffmpeg_log = []
+                try:
+                    SignalHandler.register_child_pid(process.pid)
+                except Exception:
+                    pass
+                try:
+                    for line in process.stderr:
+                        last_line = line.strip()
+                        ffmpeg_log.append(last_line)
+                        if last_line:
+                            try:
+                                progress_callback("normalizing", last_line=last_line)
+                            except Exception:
+                                pass
+                    process.wait()
+                finally:
+                    try:
+                        SignalHandler.unregister_child_pid(process.pid)
+                    except Exception:
+                        pass
+                try:
+                    if ffmpeg_log:
+                        self.logger.log_ffmpeg("NORMALIZE", media_path, "\n".join(ffmpeg_log))
+                except Exception:
+                    pass
+                if process.returncode != 0:
+                    self.logger.error(f"Normalization failed for {media_path}: ffmpeg exit {process.returncode}")
+                    if 'temp_output' in locals() and os.path.exists(temp_output):
+                        try:
+                            SignalHandler.unregister_temp_file(temp_output)
+                        except Exception:
+                            pass
+                        os.remove(temp_output)
+                    return None
+            else:
+                run_command(ffmpeg_cmd, capture_output=(not show_ui))
 
             final_path = media_path
             if os.path.exists(final_path):
@@ -128,7 +193,7 @@ class AudioProcessor:
             return None
 
 
-    def boost_audio(self, media_path: str, boost_percent: float, show_ui: bool = False, dry_run: bool = False) -> Optional[str]:
+    def boost_audio(self, media_path: str, boost_percent: float, show_ui: bool = False, dry_run: bool = False, progress_callback=None) -> Optional[str]:
         """Boost audio tracks in the given media file by the specified percentage."""
         try:
             self.logger.info(f"Starting volume boost ({boost_percent}%): {media_path}")
@@ -206,6 +271,11 @@ class AudioProcessor:
                             spinner.text = Text.from_markup(f"[bold green]Boosting {len(audio_streams)} audio track{'s' if len(audio_streams) != 1 else ''} by {boost_percent}%...[/bold green]\n{last_line}")
                         else:
                             spinner.text = Text.from_markup(f"[bold green]Boosting {len(audio_streams)} audio track{'s' if len(audio_streams) != 1 else ''} by {boost_percent}%...[/bold green]")
+                        if progress_callback:
+                            try:
+                                progress_callback("boosting", last_line=last_line)
+                            except Exception:
+                                pass
                         live.update(Panel(spinner, title="Boosting audio", border_style="green"))
                     process.wait()
                     try:
@@ -234,32 +304,75 @@ class AudioProcessor:
                     run_success = True
 
             else:
-                if dry_run:
-                    return media_path
-                try:
-                    result = run_command(ffmpeg_cmd, capture_output=True)
+                if progress_callback:
+                    if dry_run:
+                        return media_path
+                    process = popen(ffmpeg_cmd)
+                    ffmpeg_log = []
                     try:
-                        if result.stderr:
-                            self.logger.log_ffmpeg("BOOST", media_path, result.stderr)
+                        SignalHandler.register_child_pid(process.pid)
                     except Exception:
                         pass
+                    try:
+                        for line in process.stderr:
+                            last_line = line.strip()
+                            ffmpeg_log.append(last_line)
+                            if last_line:
+                                try:
+                                    progress_callback("boosting", last_line=last_line)
+                                except Exception:
+                                    pass
+                        process.wait()
+                    finally:
+                        try:
+                            SignalHandler.unregister_child_pid(process.pid)
+                        except Exception:
+                            pass
+                    try:
+                        if ffmpeg_log:
+                            self.logger.log_ffmpeg("BOOST", media_path, "\n".join(ffmpeg_log))
+                    except Exception:
+                        pass
+                    if process.returncode != 0:
+                        self.logger.error(f"Boost failed for {media_path}: ffmpeg exit {process.returncode}")
+                        if os.path.exists(temp_output):
+                            try:
+                                SignalHandler.unregister_temp_file(temp_output)
+                            except Exception:
+                                pass
+                            try:
+                                os.remove(temp_output)
+                            except Exception:
+                                pass
+                        return None
                     run_success = True
-                except Exception as e:
+                else:
+                    if dry_run:
+                        return media_path
                     try:
-                        self.logger.log_ffmpeg("BOOST_ERROR", media_path, str(e))
-                    except Exception:
-                        pass
-                    self.logger.error(f"Boost failed for {media_path}: {e}")
-                    if os.path.exists(temp_output):
+                        result = run_command(ffmpeg_cmd, capture_output=True)
                         try:
-                            SignalHandler.unregister_temp_file(temp_output)
+                            if result.stderr:
+                                self.logger.log_ffmpeg("BOOST", media_path, result.stderr)
                         except Exception:
                             pass
+                        run_success = True
+                    except Exception as e:
                         try:
-                            os.remove(temp_output)
+                            self.logger.log_ffmpeg("BOOST_ERROR", media_path, str(e))
                         except Exception:
                             pass
-                    return None
+                        self.logger.error(f"Boost failed for {media_path}: {e}")
+                        if os.path.exists(temp_output):
+                            try:
+                                SignalHandler.unregister_temp_file(temp_output)
+                            except Exception:
+                                pass
+                            try:
+                                os.remove(temp_output)
+                            except Exception:
+                                pass
+                        return None
             if not run_success:
                 return None
             if not os.path.exists(temp_output):

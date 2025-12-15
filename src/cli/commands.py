@@ -32,11 +32,13 @@ class CommandHandler:
             self.logger.error(f"Failed to process {file_path}: {e}")
             return False
 
+
     def handle_boost_directory(self, dir_path: str, percentage: float, dry_run: bool = False, max_workers: int = None):
         """Handler to boost all audio files in a directory by a given percentage."""
         self.logger.info(f"Boosting all audio files in directory: {dir_path} by {percentage}%")
         results = self.batch_processor.boost_files_with_progress(dir_path, percentage, dry_run=dry_run, max_workers=max_workers)
         return results
+
 
     def handle_normalize(self, path: str, dry_run: bool = False, max_workers: int = None):
         """Handler to normalize audio files at the given path."""
@@ -52,6 +54,7 @@ class CommandHandler:
             self.logger.error("Invalid path provided")
             return []
         return results
+
 
     def handle_boost(self, path: str, percentage: str, dry_run: bool = False, max_workers: int = None):
         """Handler to boost audio files at the given path by a specified percentage."""
@@ -82,8 +85,7 @@ class CommandHandler:
         project_root = str(pathlib.Path(__file__).resolve().parent.parent.parent)
 
         steps = [
-            {"name": "Allow user scripts (Set-ExecutionPolicy)",
-             "cmd": "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force"},
+            {"name": "Allow user scripts (Set-ExecutionPolicy)", "cmd": "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force"},
             {"name": "Install Scoop bootstrap", "cmd": "iwr -useb get.scoop.sh | iex"},
             {"name": "Install FFmpeg via Scoop", "cmd": "scoop install ffmpeg"},
         ]
