@@ -6,6 +6,9 @@
 
 This project is a command-line tool for normalizing and boosting audio tracks in media files. It helps you achieve consistent audio levels across files by analyzing loudness and applying fixes using FFmpeg. It also supports parallel processing to speed up batch operations.
 
+## Windows Executable Releases
+Pre-built Windows executable is available in the [Releases](https://github.com/tonywied17/audio-normalization/releases) section.
+
 ## Requirements
 
 To run this project, you need the following:
