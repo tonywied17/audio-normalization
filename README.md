@@ -44,7 +44,7 @@ This will install the necessary dependencies including `rich` for terminal outpu
 
 ## Alternative Installation Method (Using Scoop)
 
-For an easier installation with automatic environment variable setup, you can use [Scoop](https://scoop.sh/). For detailed instructions, see the [Scoop Installation Guide](scoop_installation_guide.md).
+For an easier installation with automatic environment variable setup, you can use [Scoop](https://scoop.sh/). For detailed instructions, see the [Scoop Installation Guide](/readme/scoop_installation_guide.md).
 
 
 ## Usage
