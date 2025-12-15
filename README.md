@@ -21,26 +21,21 @@ The CLI now auto-detects `ffmpeg` on your PATH. If FFmpeg is missing the interac
 1. **Install Python**
    - Make sure Python 3.x is installed on your system (the project is tested with Python 3.12). Download from https://www.python.org/downloads/.
 
-2. **Install FFmpeg**
+2. **Install Dependencies**
+   Once Python is installed, install the Python dependencies:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Install FFmpeg**
    - The simplest cross-platform way is to download from https://ffmpeg.org/download.html and add the `ffmpeg` executable to your PATH.
-   - On Windows you can use Scoop (the interactive CLI includes a guided "Setup FFmpeg" flow that runs the minimal Scoop bootstrap and then `scoop install ffmpeg`).
-   
    - Alternatively, the application can auto-install FFmpeg on Windows: when `ffmpeg` is not detected the interactive menu offers a "Setup FFmpeg" option that will bootstrap Scoop and install FFmpeg for you. If you are having trouble with this flow, you can manually trigger it with the debug flag:
 
 ```bash
 python -m audio_tool --debug-no-ffmpeg
 ```
 Choose the "Setup FFmpeg" option from the menu to run the guided installer.
-
-3. **Install Dependencies**
-
-Once Python and FFmpeg are installed (or after running the CLI setup on Windows), install the Python dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-This will install the necessary dependencies including `rich` for terminal output and progress bars.
 
 ## Alternative Installation Method (Using Scoop)
 
