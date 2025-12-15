@@ -39,19 +39,19 @@ def parse_args():
     parser.add_argument(
         "--I",
         type=float,
-        default=None,
+        default=NORMALIZATION_PARAMS.get('I'),
         help="Integrated loudness target (LUFS)"
     )
     parser.add_argument(
         "--TP",
         type=float,
-        default=None,
+        default=NORMALIZATION_PARAMS.get('TP'),
         help="True peak target (dBFS)"
     )
     parser.add_argument(
         "--LRA",
         type=float,
-        default=None,
+        default=NORMALIZATION_PARAMS.get('LRA'),
         help="Loudness range target (LU)"
     )
 
@@ -81,7 +81,7 @@ def parse_args():
             print("Error: Boost percentage must be a number.")
             sys.exit(1)
 
-    if not any(vars(args).values()):
+    if len(sys.argv) == 1:
         return None
 
     return args

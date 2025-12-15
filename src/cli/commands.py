@@ -18,6 +18,7 @@ class CommandHandler:
 
 
     def process_file(self, file_path: str, operation: str, **kwargs) -> bool:
+        """Process a single audio file with the specified operation."""
         processor = AudioProcessor()
         try:
             if operation == "boost":
@@ -32,11 +33,13 @@ class CommandHandler:
             return False
 
     def handle_boost_directory(self, dir_path: str, percentage: float, dry_run: bool = False, max_workers: int = None):
+        """Handler to boost all audio files in a directory by a given percentage."""
         self.logger.info(f"Boosting all audio files in directory: {dir_path} by {percentage}%")
         results = self.batch_processor.boost_files_with_progress(dir_path, percentage, dry_run=dry_run, max_workers=max_workers)
         return results
 
     def handle_normalize(self, path: str, dry_run: bool = False, max_workers: int = None):
+        """Handler to normalize audio files at the given path."""
         safe_path = path.rstrip("/\\")
         if os.path.isdir(path):
             self.logger.info(f"Normalizing directory: {safe_path}")
@@ -51,6 +54,7 @@ class CommandHandler:
         return results
 
     def handle_boost(self, path: str, percentage: str, dry_run: bool = False, max_workers: int = None):
+        """Handler to boost audio files at the given path by a specified percentage."""
         try:
             boost_percent = float(percentage)
         except ValueError:
@@ -73,12 +77,7 @@ class CommandHandler:
         
         
     def setup_ffmpeg(self) -> list:
-        """Attempt to run a guided setup to install Scoop, Python, and FFmpeg on Windows.
-
-        This runs the commands from the project's `scoop_installation_guide.md`. Each
-        step is executed via PowerShell and the stdout/stderr captured. Returns a list
-        of step results.
-        """
+        """Automate the installation of FFmpeg on Windows using Scoop."""
         results = []
         project_root = str(pathlib.Path(__file__).resolve().parent.parent.parent)
 
@@ -94,7 +93,6 @@ class CommandHandler:
             cmd = step["cmd"]
             try:
                 self.logger.info(f"Running setup step: {name}")
-                # Run via PowerShell to support the scoop bootstrap command
                 proc = subprocess.run(["powershell", "-NoProfile", "-Command", cmd], cwd=project_root, capture_output=True, text=True)
                 ok = proc.returncode == 0
                 out = proc.stdout.strip()

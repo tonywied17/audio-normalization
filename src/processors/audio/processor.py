@@ -1,4 +1,6 @@
-"""Main AudioProcessor implementation, using modular helpers."""
+"""
+Main AudioProcessor implementation, using modular helpers.
+"""
 
 import os
 import re
@@ -26,6 +28,7 @@ class AudioProcessor:
         return get_audio_streams(media_path, self.logger)
 
     def normalize_audio(self, media_path: str, show_ui: bool = False, progress_callback=None) -> Optional[str]:
+        """Normalize audio tracks in the given media file."""
         try:
             audio_streams = get_audio_streams(media_path, self.logger)
             if not audio_streams:
@@ -126,6 +129,7 @@ class AudioProcessor:
 
 
     def boost_audio(self, media_path: str, boost_percent: float, show_ui: bool = False, dry_run: bool = False) -> Optional[str]:
+        """Boost audio tracks in the given media file by the specified percentage."""
         try:
             self.logger.info(f"Starting volume boost ({boost_percent}%): {media_path}")
 

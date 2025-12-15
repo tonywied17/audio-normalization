@@ -30,11 +30,15 @@ class Logger:
 
         os.makedirs(self._log_dir, exist_ok=True)
 
+
     def _format_message(self, level: LogLevel, message: str) -> str:
+        """Format the log message with timestamp and level."""
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         return f"{timestamp} | {level.value} | {message}"
 
+
     def _write_to_file(self, message: str):
+        """Write the log message to the log file."""
         try:
             raw_message = str(message).replace('\n', ' ')
             with open(self._log_file, "a", encoding="utf-8") as f:
@@ -42,7 +46,9 @@ class Logger:
         except OSError as e:
             self.console.print(f"[red]Error writing to log file: {e}[/red]")
 
+
     def _print_to_console(self, level: LogLevel, message: str):
+        """Print the log message to the console with appropriate styling."""
         if level == LogLevel.INFO:
             self.console.print(message, style="dim bright_white", markup=False, emoji=False)
         elif level == LogLevel.ERROR:
@@ -52,24 +58,32 @@ class Logger:
         elif level == LogLevel.WARNING:
             self.console.print(message, style="yellow", markup=False, emoji=False)
 
+
     def log(self, level: LogLevel, message: str):
+        """Log a message with the specified log level."""
         formatted = self._format_message(level, message)
         self._write_to_file(formatted)
         self._print_to_console(level, message)
 
     def info(self, message: str):
+        """Log an informational message."""
         self.log(LogLevel.INFO, message)
 
     def error(self, message: str):
+        """Log an error message."""
         self.log(LogLevel.ERROR, message)
 
     def success(self, message: str):
+        """Log a success message."""
         self.log(LogLevel.SUCCESS, message)
 
     def warning(self, message: str):
+        """Log a warning message."""
         self.log(LogLevel.WARNING, message)
 
+
     def append_to_file(self, filename: str, content: str):
+        """Append content to a specified log file in the log directory."""
         try:
             os.makedirs(self._log_dir, exist_ok=True)
             target = os.path.join(self._log_dir, filename)
@@ -79,7 +93,9 @@ class Logger:
         except Exception as e:
             self.console.print(f"[red]Error writing to {filename}: {e}[/red]")
 
+
     def log_ffmpeg(self, tag: str, media_path: str, content: str):
+        """Log FFmpeg debug information to a separate file."""
         try:
             header = f"\n[{tag}] {media_path}:\n"
             body = content or ""

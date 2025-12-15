@@ -23,6 +23,7 @@ class SignalHandler:
         signal.signal(signal.SIGTERM, self._signal_handler)
 
     def _signal_handler(self, sig, frame):
+        """Handle termination signals for cleanup."""
         self.logger.info("Program interrupted. Cleaning up temporary files...")
         self.cleanup_temp_files()
         with self.cleanup_lock:
@@ -35,6 +36,7 @@ class SignalHandler:
         sys.exit(0)
 
     def cleanup_temp_files(self):
+        """Remove temporary files."""
         with self.cleanup_lock:
             for temp_file in self.temp_files:
                 if os.path.exists(temp_file):
@@ -48,6 +50,7 @@ class SignalHandler:
 
     @classmethod
     def register_temp_file(cls, path: str):
+        """Register a temporary file for cleanup."""
         if cls._global_instance:
             with cls._global_instance.cleanup_lock:
                 if path not in cls._global_instance.temp_files:
@@ -55,6 +58,7 @@ class SignalHandler:
 
     @classmethod
     def unregister_temp_file(cls, path: str):
+        """Unregister a temporary file."""
         if cls._global_instance:
             with cls._global_instance.cleanup_lock:
                 if path in cls._global_instance.temp_files:
@@ -62,6 +66,7 @@ class SignalHandler:
 
     @classmethod
     def register_child_pid(cls, pid: int):
+        """Register a child process ID for cleanup."""
         if cls._global_instance:
             with cls._global_instance.cleanup_lock:
                 if pid not in cls._global_instance.child_pids:
@@ -69,6 +74,7 @@ class SignalHandler:
 
     @classmethod
     def unregister_child_pid(cls, pid: int):
+        """Unregister a child process ID."""
         if cls._global_instance:
             with cls._global_instance.cleanup_lock:
                 if pid in cls._global_instance.child_pids:

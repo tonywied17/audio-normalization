@@ -1,8 +1,14 @@
 """
+Created Date: Monday December 15th 2025
+Author: Tony Wiedman
+-----
+Last Modified: Mon December 15th 2025 4:48:43 
+Modified By: Tony Wiedman
+-----
+Copyright (c) 2025 Molex
+
 Top-level launcher for the Audio Normalization and Boosting Tool.
 
-This script keeps compatibility with the existing internal modules which
-use top-level imports like `core` and `cli` by adding `src/` to `sys.path`.
 Run this from the project root:
 
     python audio_tool.py
@@ -10,8 +16,8 @@ Run this from the project root:
 Or run as a module (recommended):
 
     python -m audio_tool
-
 """
+
 import os
 import sys
 from typing import Optional
@@ -62,14 +68,21 @@ def run_interactive(cli: AudioNormalizationCLI, handler: CommandHandler, signal_
                         cli.console.print(f"{name}: [{color}]{status}[/{color}]")
                         if step.get("stderr"):
                             cli.console.print(step.get("stderr"))
-                    if not debug and getattr(cli, "_debug_no_ffmpeg", False):
-                        try:
-                            delattr(cli, "_debug_no_ffmpeg")
-                        except Exception:
+                    try:
+                        install_success = any(
+                            s.get("name", "").lower().startswith("install ffmpeg") and s.get("success")
+                            for s in results
+                        )
+                        if install_success and getattr(cli, "_debug_no_ffmpeg", False):
                             try:
-                                del cli._debug_no_ffmpeg
+                                delattr(cli, "_debug_no_ffmpeg")
                             except Exception:
-                                cli._debug_no_ffmpeg = False
+                                try:
+                                    del cli._debug_no_ffmpeg
+                                except Exception:
+                                    cli._debug_no_ffmpeg = False
+                    except Exception:
+                        pass
                 else:
                     handler.logger.info("FFmpeg setup canceled by user")
             elif choice == "2":
@@ -81,10 +94,10 @@ def run_interactive(cli: AudioNormalizationCLI, handler: CommandHandler, signal_
 
 
 def main():
+    """Main entry point for the audio normalization tool."""
     args = parse_args()
     handler = CommandHandler(max_workers=getattr(args, 'workers', None) if args else None)
     cli = AudioNormalizationCLI(handler)
-    # honor debug flag to simulate missing ffmpeg
     if args and getattr(args, 'debug_no_ffmpeg', False):
         setattr(cli, '_debug_no_ffmpeg', True)
     signal_handler = SignalHandler([])

@@ -20,7 +20,7 @@ SUPPORTED_EXTENSIONS = (
 AUDIO_CODEC = "ac3"
 AUDIO_BITRATE = "256k"
 
-LOG_DIR = "../logs"
+LOG_DIR = "logs/"
 LOG_FILE = "app.log"
 LOG_FFMPEG_DEBUG = "ffmpeg_debug.log"
 

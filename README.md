@@ -24,6 +24,13 @@ The CLI now auto-detects `ffmpeg` on your PATH. If FFmpeg is missing the interac
 2. **Install FFmpeg**
    - The simplest cross-platform way is to download from https://ffmpeg.org/download.html and add the `ffmpeg` executable to your PATH.
    - On Windows you can use Scoop (the interactive CLI includes a guided "Setup FFmpeg" flow that runs the minimal Scoop bootstrap and then `scoop install ffmpeg`).
+   
+   - Alternatively, the application can auto-install FFmpeg on Windows: when `ffmpeg` is not detected the interactive menu offers a "Setup FFmpeg" option that will bootstrap Scoop and install FFmpeg for you. If you are having trouble with this flow, you can manually trigger it with the debug flag:
+
+```bash
+python -m audio_tool --debug-no-ffmpeg
+```
+Choose the "Setup FFmpeg" option from the menu to run the guided installer.
 
 3. **Install Dependencies**
 
@@ -56,8 +63,7 @@ python audio_tool.py
 
 
 #### Menu Screenshots
-![Menu](https://molex.cloud/files/an-repo/menu1.png)
-![Normalize Directory Analyzing](https://molex.cloud/files/an-repo/normalize_audio1.png)
+![Audio Tool 2.2](https://molex.cloud/files/an-repo/audio-tool.gif)
 
 ### Command-Line Arguments
 
@@ -65,12 +71,11 @@ You can use the following arguments when running the tool from the command line:
 
 | Argument                | Description                                                                                       | Example Usage                             |
 |-------------------------|---------------------------------------------------------------------------------------------------|-------------------------------------------|
-| `-n`, `--normalize`      | Path to a file or directory for normalization.                                                    | `python audio_tool.py -n /path/to/file`         |
-| `--I`                   | (Optional, with `--normalize`) Integrated loudness target in LUFS. Default: `-16`.               | `python audio_tool.py -n /path/to/file --I -20` |
-| `--TP`                  | (Optional, with `--normalize`) True peak target in dBFS. Default: `-1.5`.                        | `python audio_tool.py -n /path/to/file --TP -2` |
-| `--LRA`                 | (Optional, with `--normalize`) Loudness range target in LU. Default: `11`.                       | `python audio_tool.py -n /path/to/file --LRA 10` |
-| `-b`, `--boost`          | Path to a file or directory and boost percentage (e.g., 10 for +10%, -10 for -10%).              | `python audio_tool.py -b /path/to/file 10` or `python -m audio_tool -b /path/to/dir 5` |
-
+| `-n`, `--normalize`      | Path to a file or directory for normalization.                                                    | `python -m audio_tool -n /path/to/fileOrDir`         |
+| `--I`                   | (Optional, with `--normalize`) Integrated loudness target in LUFS. Default: `-16`.               | `python -m audio_tool -n /path/to/fileOrDir --I -20` |
+| `--TP`                  | (Optional, with `--normalize`) True peak target in dBFS. Default: `-1.5`.                        | `python -m audio_tool -n /path/to/fileOrDir --TP -2` |
+| `--LRA`                 | (Optional, with `--normalize`) Loudness range target in LU. Default: `11`.                       | `python -m audio_tool -n /path/to/fileOrDir --LRA 10` |
+| `-b`, `--boost`          | Path to a file or directory and boost percentage (e.g., 10 for +10%, -10 for -10%).              | `python -m audio_tool -b /path/to/fileOrDir 10` |
 #### Notes:
 - The `--I`, `--TP`, and `--LRA` arguments are optional and can only be used with `--normalize`.
 - If no values are provided for `--I`, `--TP`, or `--LRA`, the tool will use the default normalization parameters specified in `src/core/config.py`.

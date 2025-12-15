@@ -1,9 +1,13 @@
-"""FFmpeg/ffprobe command execution helpers."""
+"""
+FFmpeg/ffprobe command execution helpers.
+"""
+
 import subprocess
 from typing import List
 
 
 def run_command(command: List[str], capture_output: bool = True) -> subprocess.CompletedProcess:
+    """Run a command and return the CompletedProcess result."""
     try:
         result = subprocess.run(
             command,

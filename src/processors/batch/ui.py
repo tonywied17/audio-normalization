@@ -1,4 +1,7 @@
-"""UI helper utilities for batch processing (panels, spinners, update closures)."""
+"""
+UI helper utilities for batch processing (panels, spinners, update closures).
+"""
+
 from typing import Callable, List, Any
 from rich.text import Text
 from rich.panel import Panel
@@ -7,11 +10,14 @@ from rich.console import Group
 
 
 def render_group(panels: List[Panel]) -> Group:
+    """Render a group of panels, filtering out None values."""
     return Group(*(p for p in panels if p is not None))
 
 
 def make_update_panel(idx: int, spinners: List[Spinner], panels: List[Panel], live_ref: dict, file: str, *, boost_percent: float = None, audio_tracks: int = 0) -> Callable:
+    """Create a closure to update a specific panel in the live display."""
     def update_panel(stage: str, last_line: str = None, error: bool = False, info_panel: Any = None):
+        """Update the panel for the given file based on the current stage."""
         if boost_percent is not None:
             if stage == "boosting":
                 text = f"[bold green]Boosting {audio_tracks} audio track{'s' if audio_tracks != 1 else ''} by {boost_percent}%...[/bold green]"

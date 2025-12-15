@@ -1,4 +1,6 @@
-"""CLI module for audio normalization and boosting application."""
+"""
+CLI module for the Audio Normalization and Boosting.
+"""
 
 import platform
 import os
@@ -20,13 +22,13 @@ class AudioNormalizationCLI:
         self.command_handler = command_handler
 
     def display_menu(self):
+        """Display the main menu with configuration panels."""
         config_title_style = "dim wheat1"
 
         try:
             ffmpeg_path = shutil.which("ffmpeg")
         except Exception:
             ffmpeg_path = None
-        # Allow an external debug override to simulate ffmpeg missing
         if getattr(self, "_debug_no_ffmpeg", False):
             ffmpeg_path = None
         self.ffmpeg_found = bool(ffmpeg_path)
@@ -154,7 +156,9 @@ class AudioNormalizationCLI:
         )
         self.console.print(layout)
 
+
     def display_results(self, results: list):
+        """Display processing results in a table."""
         if not results:
             return
         table = Table(
@@ -166,8 +170,8 @@ class AudioNormalizationCLI:
             expand=True,
             style="cyan"
         )
-        table.add_column("File", style="dim cyan")
-        table.add_column("Task", justify="center", style="italic magenta")
+        table.add_column("File", style="dim white")
+        table.add_column("Task", justify="center", style="italic white")
         table.add_column("Status", justify="center", style="bold")
         for result in results:
             status_color = "green" if result["status"] == "Success" else "red"

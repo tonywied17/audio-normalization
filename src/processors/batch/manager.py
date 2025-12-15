@@ -1,4 +1,7 @@
-"""Batch manager containing `BatchProcessor` class; delegates utilities to submodules."""
+"""
+Batch manager containing `BatchProcessor` class; delegates utilities to submodules.
+"""
+
 import os
 import threading
 import time
@@ -37,6 +40,7 @@ class BatchProcessor:
         self.logger.info(f"BatchProcessor max_workers set to: {self.max_workers}")
         self.audio_processor = AudioProcessor()
 
+
     def process_directory(self, directory: str, dry_run: bool = False, max_workers: Optional[int] = None) -> List[Dict[str, Any]]:
         """Normalize all supported media files in `directory` with a Rich UI."""
         safe_dir = directory.rstrip("/\\")
@@ -48,12 +52,9 @@ class BatchProcessor:
         self.logger.info(f"Found {len(media_files)} media files")
         return self.process_files_with_progress(media_files, dry_run=dry_run, max_workers=max_workers)
 
-    def process_files_with_progress(self, files: List[str], dry_run: bool = False, max_workers: Optional[int] = None) -> List[Dict[str, Any]]:
-        """Process a list of files with a simple threaded pool and Rich Live UI.
 
-        This provides a lightweight progress display and returns a list of results
-        with keys: `file`, `task`, `status`, and optionally `message`.
-        """
+    def process_files_with_progress(self, files: List[str], dry_run: bool = False, max_workers: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Process a list of files with a simple threaded pool and Rich Live UI."""
         worker_count = max_workers or self.max_workers
         try:
             worker_count = int(worker_count) if worker_count else 1
@@ -127,12 +128,14 @@ class BatchProcessor:
 
         return results
 
+
     def process_single_file_with_progress(self, file_path: str, dry_run: bool = False) -> Dict[str, Any]:
         """Process a single file and return a single result dict for compatibility with CLI handlers."""
         res_list = self.process_files_with_progress([file_path], dry_run=dry_run, max_workers=1)
         if res_list:
             return res_list[0]
         return {"file": file_path, "task": "normalize", "status": "Failed", "message": "No result"}
+
 
     def boost_files_with_progress(self, directory: str, boost_percent: float, dry_run: bool = False, max_workers: Optional[int] = None) -> List[Dict[str, Any]]:
         """Boost all supported media files in `directory` using threaded workers and Rich UI."""
