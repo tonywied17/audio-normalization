@@ -223,6 +223,9 @@ class AudioNormalizationCLI:
             panels.append(Panel(body, title=file_name, border_style=status_color, padding=(1,2)))
 
         self.console.print(Columns(panels, equal=True, expand=True))
+        if getattr(self.console, "record", False) or not sys.stdin.isatty() or os.environ.get("PYTEST_CURRENT_TEST"):
+            return
+
         action = self._wait_for_resume_or_exit()
         if action == "enter":
             try:
