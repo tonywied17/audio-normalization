@@ -5,6 +5,7 @@ CLI module for the Audio Normalization and Boosting.
 import platform
 import os
 import shutil
+import sys
 from rich.console import Console, Group
 from rich.table import Table
 from rich import box
@@ -157,6 +158,35 @@ class AudioNormalizationCLI:
         )
         self.console.print(layout)
 
+    def _wait_for_resume_or_exit(self):
+        """Wait for a single keypress: Enter to resume, Esc to exit."""
+        def _get_single_key():
+            try:
+                import msvcrt
+                return msvcrt.getwch()
+            except Exception:
+                import tty
+                import termios
+                fd = sys.stdin.fileno()
+                old = termios.tcgetattr(fd)
+                try:
+                    tty.setraw(fd)
+                    ch = sys.stdin.read(1)
+                    return ch
+                finally:
+                    termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+        prompt = Text.assemble(("Press ", "dim"), ("[Enter]", "bold"), (" to start another task", "dim"), (" • ", "dim"), ("Press ", "dim"), ("[Esc]", "bold"), (" to close", "dim"))
+        self.console.print("")
+        self.console.print(Align.center(prompt))
+        self.console.print("")
+        while True:
+            ch = _get_single_key()
+            if ch in ("\r", "\n"):
+                return "enter"
+            if ch == "\x1b":
+                return "esc"
+
 
     def display_results(self, results: list):
         """Display processing results using a panel-per-file layout with a summary."""
@@ -193,3 +223,14 @@ class AudioNormalizationCLI:
             panels.append(Panel(body, title=file_name, border_style=status_color, padding=(1,2)))
 
         self.console.print(Columns(panels, equal=True, expand=True))
+        action = self._wait_for_resume_or_exit()
+        if action == "enter":
+            try:
+                self.display_menu()
+            except Exception:
+                pass
+        elif action == "esc":
+            try:
+                sys.exit(0)
+            except Exception:
+                pass
