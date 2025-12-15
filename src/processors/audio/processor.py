@@ -196,7 +196,7 @@ class AudioProcessor:
     def boost_audio(self, media_path: str, boost_percent: float, show_ui: bool = False, dry_run: bool = False, progress_callback=None) -> Optional[str]:
         """Boost audio tracks in the given media file by the specified percentage."""
         try:
-            self.logger.info(f"Starting volume boost ({boost_percent}%): {media_path}")
+            # self.logger.info(f"Starting volume boost ({boost_percent}%): {media_path}")
 
             audio_streams = get_audio_streams(media_path, self.logger)
             if not audio_streams:

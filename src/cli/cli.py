@@ -14,6 +14,7 @@ from rich.align import Align
 from rich.layout import Layout
 from rich.text import Text
 from rich.columns import Columns
+from rich.panel import Panel
 
 
 class AudioNormalizationCLI:
@@ -159,6 +160,10 @@ class AudioNormalizationCLI:
 
     def display_results(self, results: list):
         """Display processing results using a panel-per-file layout with a summary."""
+        try:
+            Panel
+        except NameError:
+            from rich.panel import Panel
         if not results:
             self.console.print("[bold yellow]No results to display[/bold yellow]")
             return
@@ -180,7 +185,7 @@ class AudioNormalizationCLI:
 
             body = Text()
             body.append(f"{task}\n", style="bold white")
-            body.append(f"[{status_color}]{status}[/{status_color}]\n")
+            body.append(status + "\n", style=status_color)
             if message:
                 body.append("\n")
                 body.append(message, style="dim")
