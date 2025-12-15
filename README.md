@@ -71,11 +71,11 @@ You can use the following arguments when running the tool from the command line:
 
 | Argument                | Description                                                                                       | Example Usage                             |
 |-------------------------|---------------------------------------------------------------------------------------------------|-------------------------------------------|
-| `-n`, `--normalize`      | Path to a file or directory for normalization.                                                    | `python -m audio_tool -n /path/to/fileOrDir`         |
-| `--I`                   | (Optional, with `--normalize`) Integrated loudness target in LUFS. Default: `-16`.               | `python -m audio_tool -n /path/to/fileOrDir --I -20` |
-| `--TP`                  | (Optional, with `--normalize`) True peak target in dBFS. Default: `-1.5`.                        | `python -m audio_tool -n /path/to/fileOrDir --TP -2` |
-| `--LRA`                 | (Optional, with `--normalize`) Loudness range target in LU. Default: `11`.                       | `python -m audio_tool -n /path/to/fileOrDir --LRA 10` |
-| `-b`, `--boost`          | Path to a file or directory and boost percentage (e.g., 10 for +10%, -10 for -10%).              | `python -m audio_tool -b /path/to/fileOrDir 10` |
+| `-n`, `--normalize`      | Path to a file or directory for normalization.                                                    | `python -m audio_tool -n "/path/to/fileOrDir"`         |
+| `--I`                   | (Optional, with `--normalize`) Integrated loudness target in LUFS. Default: `-16`.               | `python -m audio_tool -n "/path/to/fileOrDir" --I -20` |
+| `--TP`                  | (Optional, with `--normalize`) True peak target in dBFS. Default: `-1.5`.                        | `python -m audio_tool -n "/path/to/fileOrDir" --TP -2` |
+| `--LRA`                 | (Optional, with `--normalize`) Loudness range target in LU. Default: `11`.                       | `python -m audio_tool -n "/path/to/fileOrDir" --LRA 10` |
+| `-b`, `--boost`          | Path to a file or directory and boost percentage (e.g., 10 for +10%, -10 for -10%).              | `python -m audio_tool -b "/path/to/fileOrDir" 10` |
 #### Notes:
 - The `--I`, `--TP`, and `--LRA` arguments are optional and can only be used with `--normalize`.
 - If no values are provided for `--I`, `--TP`, or `--LRA`, the tool will use the default normalization parameters specified in `src/core/config.py`.
@@ -88,22 +88,22 @@ You can use the following arguments when running the tool from the command line:
 
 #### Normalize a Single File with Default Parameters:
 ```bash
-python audio_tool.py -n /path/to/file.mkv
+python audio_tool.py -n "/path/to/file.mkv"
 ```
 
 #### Normalize a Directory with Custom Parameters:
 ```bash
-python audio_tool.py -n /path/to/directory --I -18 --TP -2 --LRA 9
+python audio_tool.py -n "/path/to/directory" --I -18 --TP -2 --LRA 9
 ```
 
 #### Apply Audio Boost to a File:
 ```bash
-python audio_tool.py -b /path/to/file.mkv 10
+python audio_tool.py -b "/path/to/file.mkv" 10
 ```
 
 #### Apply Audio Boost to All Files in a Directory:
 ```bash
-python audio_tool.py -b /path/to/directory 5
+python audio_tool.py -b "/path/to/directory" 5
 ```
 
 ## How It Works

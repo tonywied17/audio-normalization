@@ -19,7 +19,7 @@ def parse_args():
     )
     group.add_argument(
         "-b", "--boost",
-        nargs='+',
+        nargs=2,
         metavar=("PATH", "PERCENTAGE"),
         help="Path to a file or directory and boost percentage (e.g., 10 for +10%%, -10 for -10%%). If a directory is given, all supported files will be boosted."
     )
@@ -39,19 +39,19 @@ def parse_args():
     parser.add_argument(
         "--I",
         type=float,
-        default=NORMALIZATION_PARAMS.get('I'),
+        default=None,
         help="Integrated loudness target (LUFS)"
     )
     parser.add_argument(
         "--TP",
         type=float,
-        default=NORMALIZATION_PARAMS.get('TP'),
+        default=None,
         help="True peak target (dBFS)"
     )
     parser.add_argument(
         "--LRA",
         type=float,
-        default=NORMALIZATION_PARAMS.get('LRA'),
+        default=None,
         help="Loudness range target (LU)"
     )
 
@@ -63,11 +63,20 @@ def parse_args():
 
     args = parser.parse_args()
 
-    if args.boost and any(x is not None for x in [args.I, args.TP, args.LRA]):
+    if len(sys.argv) == 1:
+        return None
+
+    provided_flags = {
+        'I': any(arg.startswith('--I') for arg in sys.argv[1:]),
+        'TP': any(arg.startswith('--TP') for arg in sys.argv[1:]),
+        'LRA': any(arg.startswith('--LRA') for arg in sys.argv[1:]),
+    }
+
+    if args.boost and any(provided_flags.values()):
         print("Error: Normalization parameters cannot be used with --boost")
         sys.exit(1)
 
-    if args.normalize is None and any(x is not None for x in [args.I, args.TP, args.LRA]):
+    if args.normalize is None and any(provided_flags.values()):
         print("Error: Normalization parameters require --normalize")
         sys.exit(1)
 
@@ -81,7 +90,12 @@ def parse_args():
             print("Error: Boost percentage must be a number.")
             sys.exit(1)
 
-    if len(sys.argv) == 1:
-        return None
+    if args.normalize is not None:
+        if not provided_flags['I']:
+            args.I = NORMALIZATION_PARAMS.get('I')
+        if not provided_flags['TP']:
+            args.TP = NORMALIZATION_PARAMS.get('TP')
+        if not provided_flags['LRA']:
+            args.LRA = NORMALIZATION_PARAMS.get('LRA')
 
     return args
