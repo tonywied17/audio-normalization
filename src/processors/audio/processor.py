@@ -4,9 +4,9 @@ import os
 import re
 import json
 from typing import Optional, List, Dict, Any
-from ..config import NORMALIZATION_PARAMS, AUDIO_CODEC, AUDIO_BITRATE
-from ..logger import Logger
-from ..signal_handler import SignalHandler
+from core.config import NORMALIZATION_PARAMS, AUDIO_CODEC, AUDIO_BITRATE
+from core.logger import Logger
+from core.signal_handler import SignalHandler
 from .runner import run_command, popen
 from .probe import get_audio_streams, get_video_streams
 from .utils import update_track_title, create_temp_file, channels_to_layout
@@ -26,7 +26,6 @@ class AudioProcessor:
         return get_audio_streams(media_path, self.logger)
 
     def normalize_audio(self, media_path: str, show_ui: bool = False, progress_callback=None) -> Optional[str]:
-        """Normalize audio tracks in the given media file."""
         try:
             audio_streams = get_audio_streams(media_path, self.logger)
             if not audio_streams:
@@ -127,7 +126,6 @@ class AudioProcessor:
 
 
     def boost_audio(self, media_path: str, boost_percent: float, show_ui: bool = False, dry_run: bool = False) -> Optional[str]:
-        """Boost audio tracks in the given media file by a specified percentage."""
         try:
             self.logger.info(f"Starting volume boost ({boost_percent}%): {media_path}")
 

@@ -4,7 +4,7 @@ Argument parsing for audio normalization CLI.
 
 import sys
 import argparse
-from src.config import NORMALIZATION_PARAMS
+from core.config import NORMALIZATION_PARAMS
 
 def parse_args():
     """Parse command-line arguments."""
@@ -24,7 +24,6 @@ def parse_args():
         help="Path to a file or directory and boost percentage (e.g., 10 for +10%%, -10 for -10%%). If a directory is given, all supported files will be boosted."
     )
 
-    #! Batch processing options
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -37,7 +36,6 @@ def parse_args():
         help="Maximum number of concurrent worker threads to use for batch processing (default: auto-detect)"
     )
 
-    #! Normalization parameters
     parser.add_argument(
         "--I",
         type=float,
@@ -57,9 +55,14 @@ def parse_args():
         help="Loudness range target (LU)"
     )
 
+    parser.add_argument(
+        "--debug-no-ffmpeg",
+        action="store_true",
+        help="Debug: show the UI as if FFmpeg is not installed (useful for testing the setup flow)"
+    )
+
     args = parser.parse_args()
 
-    #! Validate mutually exclusive options
     if args.boost and any(x is not None for x in [args.I, args.TP, args.LRA]):
         print("Error: Normalization parameters cannot be used with --boost")
         sys.exit(1)
@@ -68,7 +71,6 @@ def parse_args():
         print("Error: Normalization parameters require --normalize")
         sys.exit(1)
 
-    #! Validate boost arguments
     if args.boost:
         if len(args.boost) != 2:
             print("Error: --boost requires a path and a percentage (e.g., --boost <file_or_dir> <percent>)")
@@ -83,4 +85,3 @@ def parse_args():
         return None
 
     return args
-

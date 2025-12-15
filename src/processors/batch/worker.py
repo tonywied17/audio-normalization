@@ -1,10 +1,8 @@
 """Core processing functions for individual files (normalize / boost)."""
-
 from typing import Dict, Any
 
 
 def boost_file(audio_processor, file_path: str, boost_percent: float, dry_run: bool = False, show_ui: bool = False) -> Dict[str, Any]:
-    """Boost a single file using the provided AudioProcessor."""
     if dry_run:
         return {"success": True, "message": "Dry Run"}
     try:
@@ -17,7 +15,6 @@ def boost_file(audio_processor, file_path: str, boost_percent: float, dry_run: b
 
 
 def normalize_file(audio_processor, file_path: str, dry_run: bool = False, progress_callback=None, show_ui: bool = False) -> Dict[str, Any]:
-    """Normalize a single file using the provided AudioProcessor."""
     if dry_run:
         return {"success": True, "message": "Dry Run"}
     try:

@@ -1,12 +1,11 @@
 """Probe helpers that use ffprobe to discover media streams."""
-
 import json
 from typing import Any, Dict, List
 from .runner import run_command
+from core.logger import Logger
 
 
-def get_audio_streams(media_path: str, logger) -> List[Dict[str, Any]]:
-    """Get audio stream information using ffprobe with multiple fallbacks."""
+def get_audio_streams(media_path: str, logger: Logger) -> List[Dict[str, Any]]:
     ffprobe_cmd = [
         "ffprobe", "-i", media_path,
         "-show_streams", "-select_streams", "a",
@@ -47,7 +46,6 @@ def get_audio_streams(media_path: str, logger) -> List[Dict[str, Any]]:
 
 
 def get_video_streams(media_path: str) -> List[Dict[str, Any]]:
-    """Get video stream information using ffprobe."""
     ffprobe_cmd = [
         "ffprobe", "-i", media_path,
         "-show_streams", "-select_streams", "v",

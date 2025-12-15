@@ -11,10 +11,8 @@ def render_group(panels: List[Panel]) -> Group:
 
 
 def make_update_panel(idx: int, spinners: List[Spinner], panels: List[Panel], live_ref: dict, file: str, *, boost_percent: float = None, audio_tracks: int = 0) -> Callable:
-    """Return an `update_panel(stage, last_line=None, error=False, info_panel=None)` function for the given index."""
     def update_panel(stage: str, last_line: str = None, error: bool = False, info_panel: Any = None):
         if boost_percent is not None:
-            # boost UI
             if stage == "boosting":
                 text = f"[bold green]Boosting {audio_tracks} audio track{'s' if audio_tracks != 1 else ''} by {boost_percent}%...[/bold green]"
                 if last_line:
@@ -43,7 +41,6 @@ def make_update_panel(idx: int, spinners: List[Spinner], panels: List[Panel], li
                     except Exception:
                         pass
         else:
-            # normalize UI
             if stage == "analyzing":
                 text = f"[bold bright_blue]Analyzing {audio_tracks} audio track{'s' if audio_tracks != 1 else ''}...[/bold bright_blue]"
                 if last_line:
@@ -90,7 +87,6 @@ def make_update_panel(idx: int, spinners: List[Spinner], panels: List[Panel], li
                         live_ref["live"].update(render_group(panels))
                     except Exception:
                         pass
-        # info_panel handling for normalize path
         if info_panel is not None:
             try:
                 panels[idx] = Panel(info_panel, title=f"{file}")

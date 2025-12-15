@@ -70,7 +70,6 @@ class Logger:
         self.log(LogLevel.WARNING, message)
 
     def append_to_file(self, filename: str, content: str):
-        """Append raw content to a file inside the logger's log directory."""
         try:
             os.makedirs(self._log_dir, exist_ok=True)
             target = os.path.join(self._log_dir, filename)
@@ -81,7 +80,6 @@ class Logger:
             self.console.print(f"[red]Error writing to {filename}: {e}[/red]")
 
     def log_ffmpeg(self, tag: str, media_path: str, content: str):
-        """Convenience wrapper to write ffmpeg-related debug entries."""
         try:
             header = f"\n[{tag}] {media_path}:\n"
             body = content or ""

@@ -1,14 +1,12 @@
 """Utility helpers for metadata and temp file handling."""
-
 import os
 import re
 from typing import Dict
-from ..config import TEMP_SUFFIX
-from ..signal_handler import SignalHandler
+from core.config import TEMP_SUFFIX
+from core.signal_handler import SignalHandler
 
 
 def update_track_title(original_title: str, operation: str, extra: str = "") -> str:
-    """Update the track title with a normalization or boost tag."""
     cleaned = re.sub(r"\[molexAudio (Normalized|Boosted [^]]+)\] ?", "", original_title).strip()
     tag = f"[molexAudio {operation}"
     if extra:
@@ -18,7 +16,6 @@ def update_track_title(original_title: str, operation: str, extra: str = "") -> 
 
 
 def create_temp_file(original_path: str) -> str:
-    """Create a temp file path and register it for cleanup."""
     base, ext = os.path.splitext(original_path)
     temp_path = f"{base}{TEMP_SUFFIX}{ext}"
     try:

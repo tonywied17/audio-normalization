@@ -1,13 +1,12 @@
-"""
-CLI module for audio normalization and boosting application.
-"""
+"""CLI module for audio normalization and boosting application."""
+
 import platform
 import os
 import shutil
 from rich.console import Console, Group
 from rich.table import Table
 from rich import box
-from src.config import NORMALIZATION_PARAMS, AUDIO_CODEC, AUDIO_BITRATE, SUPPORTED_EXTENSIONS, LOG_DIR, LOG_FILE, LOG_FFMPEG_DEBUG, VERSION
+from core.config import NORMALIZATION_PARAMS, AUDIO_CODEC, AUDIO_BITRATE, SUPPORTED_EXTENSIONS, LOG_DIR, LOG_FILE, LOG_FFMPEG_DEBUG, VERSION
 from rich.padding import Padding
 from rich.align import Align
 from rich.layout import Layout
@@ -22,6 +21,21 @@ class AudioNormalizationCLI:
 
     def display_menu(self):
         config_title_style = "dim wheat1"
+
+        try:
+            ffmpeg_path = shutil.which("ffmpeg")
+        except Exception:
+            ffmpeg_path = None
+        # Allow an external debug override to simulate ffmpeg missing
+        if getattr(self, "_debug_no_ffmpeg", False):
+            ffmpeg_path = None
+        self.ffmpeg_found = bool(ffmpeg_path)
+        if ffmpeg_path:
+            ffmpeg_status = "[green]Found[/green]"
+            ffmpeg_link = ""
+        else:
+            ffmpeg_status = "[red]Not found[/red]"
+            ffmpeg_link = " — [link=https://ffmpeg.org/download.html]Download FFmpeg[/link]"
 
         #! Normalization params panel
         norm_table = Table.grid(padding=(0,1))
@@ -57,6 +71,7 @@ class AudioNormalizationCLI:
         log_table.add_row("Log Directory", f"[white]{LOG_DIR}[/white]")
         log_table.add_row("Log File", f"[white]{LOG_FILE}[/white]")
         log_table.add_row("FFmpeg Debug Log", f"[white]{LOG_FFMPEG_DEBUG}[/white]")
+        log_table.add_row("FFmpeg", f"{ffmpeg_status}{ffmpeg_link}")
         log_panel = Align.center(
             Group(
                 Align.center(Text("Logging", style=config_title_style)),
@@ -112,9 +127,13 @@ class AudioNormalizationCLI:
         )
         menu_table.add_column("[bold grey42]Option[/bold grey42]", justify="center", style="wheat1", width=10)
         menu_table.add_column("[bold grey42]Description[/bold grey42]", justify="left", style="white")
-        menu_table.add_row("[1]", "[white][bold green]Boost[/bold green] Audio Track(s) for a File or Directory[/white]")
-        menu_table.add_row("[2]", "[white][bold bright_blue]Normalize[/bold bright_blue] Audio Track(s) for a File or Directory[/white]")
-        menu_table.add_row("[3]", "[white][bold red]Exit[/bold red][/white]")
+        if self.ffmpeg_found:
+            menu_table.add_row("[1]", "[white][bold green]Boost[/bold green] Audio Track(s) for a File or Directory[/white]")
+            menu_table.add_row("[2]", "[white][bold bright_blue]Normalize[/bold bright_blue] Audio Track(s) for a File or Directory[/white]")
+            menu_table.add_row("[3]", "[white][bold red]Exit[/bold red][/white]")
+        else:
+            menu_table.add_row("[1]", "[white][bold yellow]Setup FFmpeg[/bold yellow] Install Scoop and FFmpeg (Windows only)[/white]")
+            menu_table.add_row("[2]", "[white][bold red]Exit[/bold red][/white]")
 
         title_text = Text("🎵 Audio Normalization CLI", style="bold bright_white", justify="center")
         subtitle = Text.assemble(("by molex | ", "dim"), (f"v{VERSION}", "dim"))

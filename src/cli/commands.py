@@ -2,10 +2,13 @@
 Command handling module for audio normalization and boosting.
 """
 
-from src.audio_processor import AudioProcessor
-from src.batch_processor import BatchProcessor
-from src.logger import Logger
+from processors.audio import AudioProcessor
+from processors.batch import BatchProcessor
+from core.logger import Logger
 import os
+import subprocess
+import pathlib
+import shlex
 
 
 class CommandHandler:
@@ -67,3 +70,41 @@ class CommandHandler:
         else:
             self.logger.error("Invalid file or directory path")
             return []
+        
+        
+    def setup_ffmpeg(self) -> list:
+        """Attempt to run a guided setup to install Scoop, Python, and FFmpeg on Windows.
+
+        This runs the commands from the project's `scoop_installation_guide.md`. Each
+        step is executed via PowerShell and the stdout/stderr captured. Returns a list
+        of step results.
+        """
+        results = []
+        project_root = str(pathlib.Path(__file__).resolve().parent.parent.parent)
+
+        steps = [
+            {"name": "Allow user scripts (Set-ExecutionPolicy)",
+             "cmd": "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force"},
+            {"name": "Install Scoop bootstrap", "cmd": "iwr -useb get.scoop.sh | iex"},
+            {"name": "Install FFmpeg via Scoop", "cmd": "scoop install ffmpeg"},
+        ]
+
+        for step in steps:
+            name = step["name"]
+            cmd = step["cmd"]
+            try:
+                self.logger.info(f"Running setup step: {name}")
+                # Run via PowerShell to support the scoop bootstrap command
+                proc = subprocess.run(["powershell", "-NoProfile", "-Command", cmd], cwd=project_root, capture_output=True, text=True)
+                ok = proc.returncode == 0
+                out = proc.stdout.strip()
+                err = proc.stderr.strip()
+                results.append({"name": name, "success": ok, "stdout": out, "stderr": err})
+                if ok:
+                    self.logger.info(f"Setup step succeeded: {name}")
+                else:
+                    self.logger.error(f"Setup step failed: {name}: {err}")
+            except Exception as e:
+                results.append({"name": name, "success": False, "stdout": "", "stderr": str(e)})
+                self.logger.error(f"Exception running setup step {name}: {e}")
+        return results
