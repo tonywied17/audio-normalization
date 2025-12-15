@@ -63,7 +63,7 @@ python audio_tool.py
 
 
 #### Menu Screenshots
-![Audio Tool 2.2](https://github.com/tonywied17/audio-normalization/blob/main/audio-tool-optimized.gif?raw=true)
+![Audio Tool 2.2](https://github.com/tonywied17/audio-normalization/blob/main/readme/audio-tool-optimized.gif?raw=true)
 
 ### Command-Line Arguments
 
