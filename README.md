@@ -63,8 +63,7 @@ python audio_tool.py
 
 
 #### Menu Screenshots
-![Audio Tool 2.2](https://molex.cloud/files/an-repo/audio-tool-optimized.gif)
-![hippo](https://media3.giphy.com/media/aUovxH8Vf9qDu/giphy.gif)
+![Audio Tool 2.2](https://molex.cloud/files/an-repo/audio-tool-o.gif)
 
 ### Command-Line Arguments
 
