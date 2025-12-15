@@ -25,7 +25,6 @@ class SignalHandler:
     def _signal_handler(self, sig, frame):
         self.logger.info("Program interrupted. Cleaning up temporary files...")
         self.cleanup_temp_files()
-        # attempt to kill any tracked child processes
         with self.cleanup_lock:
             for pid in list(self.child_pids):
                 try:
@@ -45,7 +44,6 @@ class SignalHandler:
                     except Exception as e:
                         self.logger.error(f"Failed to clean up {temp_file}: {e}")
 
-    # static registry helpers to manage a single global instance
     _global_instance = None
 
     @classmethod

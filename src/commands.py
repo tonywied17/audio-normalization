@@ -1,10 +1,12 @@
 """
-Command handlers for audio normalization CLI.
+Command handling module for audio normalization and boosting.
 """
+
 from src.audio_processor import AudioProcessor
 from src.batch_processor import BatchProcessor
 from src.logger import Logger
 import os
+
 
 class CommandHandler:
     def __init__(self, max_workers: int = None):

@@ -1,16 +1,19 @@
 """
-CLI UI logic for Audio Normalization Tool.
+CLI module for audio normalization and boosting application.
 """
+import platform
+import os
+import shutil
 from rich.console import Console, Group
 from rich.table import Table
 from rich import box
-from src.config import NORMALIZATION_PARAMS, AUDIO_CODEC, AUDIO_BITRATE, SUPPORTED_EXTENSIONS, LOG_DIR, LOG_FILE, VERSION
-from rich.panel import Panel
+from src.config import NORMALIZATION_PARAMS, AUDIO_CODEC, AUDIO_BITRATE, SUPPORTED_EXTENSIONS, LOG_DIR, LOG_FILE, LOG_FFMPEG_DEBUG, VERSION
 from rich.padding import Padding
 from rich.align import Align
 from rich.layout import Layout
 from rich.text import Text
 from rich.columns import Columns
+
 
 class AudioNormalizationCLI:
     def __init__(self, command_handler):
@@ -18,12 +21,9 @@ class AudioNormalizationCLI:
         self.command_handler = command_handler
 
     def display_menu(self):
-        import platform
-        import os
-        import shutil
         config_title_style = "dim wheat1"
 
-        # Normalization params panel
+        #! Normalization params panel
         norm_table = Table.grid(padding=(0,1))
         norm_table.add_column(justify="right", style="bold grey50")
         norm_table.add_column(justify="left", style="white")
@@ -38,7 +38,7 @@ class AudioNormalizationCLI:
             vertical="top",
         )
 
-        # Supported extensions panel
+        #! Supported extensions panel
         ext_table = Table.grid(padding=(0,1))
         ext_table.add_column(justify="left", style="white")
         ext_table.add_row(", ".join([f"[white]{ext}[/white]" for ext in sorted(list(SUPPORTED_EXTENSIONS))]))
@@ -50,14 +50,13 @@ class AudioNormalizationCLI:
             vertical="top",
         )
 
-        # Logging panel
+        #! Logging panel
         log_table = Table.grid(padding=(0,1))
         log_table.add_column(justify="right", style="bold grey50")
         log_table.add_column(justify="left", style="white")
         log_table.add_row("Log Directory", f"[white]{LOG_DIR}[/white]")
         log_table.add_row("Log File", f"[white]{LOG_FILE}[/white]")
-        ffmpeg_log_path = "ffmpeg_debug.log"
-        log_table.add_row("FFmpeg Debug Log", f"[white]{ffmpeg_log_path}[/white]")
+        log_table.add_row("FFmpeg Debug Log", f"[white]{LOG_FFMPEG_DEBUG}[/white]")
         log_panel = Align.center(
             Group(
                 Align.center(Text("Logging", style=config_title_style)),
@@ -66,7 +65,7 @@ class AudioNormalizationCLI:
             vertical="top",
         )
 
-        # Audio output panel
+        #! Audio output panel
         audio_table = Table.grid(padding=(0,1))
         audio_table.add_column(justify="right", style="bold grey50")
         audio_table.add_column(justify="left", style="white")
@@ -80,7 +79,7 @@ class AudioNormalizationCLI:
             vertical="top",
         )
 
-        # System info panel
+        #! System info panel
         cpu = platform.processor() or platform.machine() or "Unknown"
         core_count = os.cpu_count() or "Unknown"
         sys_table = Table.grid(padding=(0,1))

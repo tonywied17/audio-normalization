@@ -1,17 +1,17 @@
+"""
+Main entry point for the Audio Normalization and Boosting Tool.
+"""
+
 import os
-import sys
-import argparse
-from rich.console import Console
-from rich.table import Table
-from rich import box
-from src.batch_processor import BatchProcessor
 from src.argparse_config import parse_args
 from src.commands import CommandHandler
 from src.cli import AudioNormalizationCLI
 from src.signal_handler import SignalHandler
 from src.config import NORMALIZATION_PARAMS
 
+
 def run_interactive(cli: AudioNormalizationCLI, handler: CommandHandler, signal_handler: SignalHandler):
+    """Run the interactive CLI loop."""
     while True:
         cli.display_menu()
         choice = cli.console.input("[bold wheat1]Enter choice: [/bold wheat1]").strip()
@@ -22,7 +22,6 @@ def run_interactive(cli: AudioNormalizationCLI, handler: CommandHandler, signal_
             cli.display_results(results)
         elif choice == "2":
             path = cli.console.input("[bold wheat1]Enter file or directory path: [/bold wheat1]").strip()
-            import os
             if os.path.exists(path):
                 results = handler.handle_normalize(path)
                 cli.display_results(results)
@@ -36,12 +35,12 @@ def run_interactive(cli: AudioNormalizationCLI, handler: CommandHandler, signal_
     signal_handler.cleanup_temp_files()
 
 def main():
+    """Main function to run the application."""
     args = parse_args()
     handler = CommandHandler(max_workers=getattr(args, 'workers', None) if args else None)
     cli = AudioNormalizationCLI(handler)
     signal_handler = SignalHandler([])
 
-    # update normalization params if provided
     if args and getattr(args, 'normalize', None):
         if args.I is not None:
             NORMALIZATION_PARAMS['I'] = args.I

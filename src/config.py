@@ -8,9 +8,9 @@ VERSION = "2.2"
 
 #! Normalization parameters (EBU R128 defaults)
 NORMALIZATION_PARAMS: Dict[str, float] = {
-    "I": -16.0,     # Integrated loudness target (LUFS)
-    "TP": -1.5,     # True peak target (dBFS)
-    "LRA": 11.0,    # Loudness range target (LU)
+    "I": -16.0,     #!> Integrated loudness target (LUFS)
+    "TP": -1.5,     #!> True peak target (dBFS)
+    "LRA": 11.0,    #!> Loudness range target (LU)
 }
 
 #! Supported media file extensions
@@ -26,6 +26,7 @@ AUDIO_BITRATE = "256k"
 #! Logging
 LOG_DIR = "logs"
 LOG_FILE = "app.log"
+LOG_FFMPEG_DEBUG = "ffmpeg_debug.log"
 
 #! Temporary file suffix
 TEMP_SUFFIX = "_temp_processing"
