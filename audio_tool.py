@@ -18,24 +18,85 @@ Or run as a module (recommended):
     python -m audio_tool
 """
 
+from cli import parse_args, AudioNormalizationCLI, CommandHandler
+from core.signal_handler import SignalHandler
+from core.config import NORMALIZATION_PARAMS
 import os
 import sys
-from typing import Optional
+import ctypes
+try:
+    from ctypes import wintypes
+except Exception:
+    wintypes = None
+
+if getattr(sys, "frozen", False):
+    try:
+        kernel32 = ctypes.windll.kernel32
+        kernel32.AllocConsole()
+        try:
+            kernel32.SetConsoleOutputCP(65001)
+        except Exception:
+            pass
+        try:
+            STD_OUTPUT_HANDLE = -11
+            STD_ERROR_HANDLE = -12
+            out_handle = kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
+            err_handle = kernel32.GetStdHandle(STD_ERROR_HANDLE)
+            mode = ctypes.c_uint()
+            ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+            if kernel32.GetConsoleMode(out_handle, ctypes.byref(mode)):
+                kernel32.SetConsoleMode(out_handle, mode.value | ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+            if kernel32.GetConsoleMode(err_handle, ctypes.byref(mode)):
+                kernel32.SetConsoleMode(err_handle, mode.value | ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+        except Exception:
+            pass
+        try:
+            user32 = ctypes.windll.user32
+            hwnd = kernel32.GetConsoleWindow()
+            if hwnd:
+                try:
+                    SWP_NOZORDER = 0x0004
+                    user32.SetWindowPos.argtypes = [wintypes.HWND, wintypes.HWND, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_uint]
+                    user32.SetWindowPos.restype = ctypes.c_bool
+                    DESIRED_WIDTH = 1100
+                    DESIRED_HEIGHT = 600
+                    POS_X = 100
+                    POS_Y = 50
+                    user32.SetWindowPos(hwnd, 0, POS_X, POS_Y, DESIRED_WIDTH, DESIRED_HEIGHT, SWP_NOZORDER)
+                except Exception:
+                    pass
+                try:
+                    kernel32.SetConsoleTitleW("[molexAudio] Audio Normalization and Booster Tool")
+                except Exception:
+                    try:
+                        user32.SetWindowTextW(hwnd, "[molexAudio] Audio Normalization and Booster Tool")
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+        sys.stdout = open("CONOUT$", "w", encoding="utf-8", errors="replace")
+        sys.stderr = open("CONOUT$", "w", encoding="utf-8", errors="replace")
+        sys.stdin = open("CONIN$", "r", encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.join(PROJECT_ROOT, "src")
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
 
-from cli import parse_args, AudioNormalizationCLI, CommandHandler
-from core.signal_handler import SignalHandler
-from core.config import NORMALIZATION_PARAMS
-
-
 def run_interactive(cli: AudioNormalizationCLI, handler: CommandHandler, signal_handler: SignalHandler, debug: bool = False):
     """Run the interactive CLI loop."""
     while True:
         cli.display_menu()
+        try:
+            cli.console.print("\n\n\n")
+        except Exception:
+            try:
+                print("\n\n\n")
+            except Exception:
+                pass
         choice = cli.console.input("[bold wheat1]Enter choice: [/bold wheat1]").strip()
         if getattr(cli, "ffmpeg_found", False):
             if choice == "1":

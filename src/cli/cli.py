@@ -48,24 +48,30 @@ class AudioNormalizationCLI:
         norm_table.add_row("Integrated Loudness (I)", f"[white]{NORMALIZATION_PARAMS['I']} LUFS[/white]")
         norm_table.add_row("True Peak (TP)", f"[white]{NORMALIZATION_PARAMS['TP']} dBFS[/white]")
         norm_table.add_row("Loudness Range (LRA)", f"[white]{NORMALIZATION_PARAMS['LRA']} LU[/white]")
-        norm_panel = Align.center(
-            Group(
-                Align.center(Text("Normalization Params", style=config_title_style)),
-                Padding(Align.center(norm_table, vertical="top"), (1, 4)),
+        norm_panel = Padding(
+            Align.center(
+                Group(
+                    Align.center(Text("Normalization Params", style=config_title_style)),
+                    Padding(Align.center(norm_table, vertical="top"), (0, 2)),
+                ),
+                vertical="top",
             ),
-            vertical="top",
+            (0, 0, 1, 0),
         )
 
         #! Supported extensions panel
         ext_table = Table.grid(padding=(0,1))
         ext_table.add_column(justify="left", style="white")
         ext_table.add_row(", ".join([f"[white]{ext}[/white]" for ext in sorted(list(SUPPORTED_EXTENSIONS))]))
-        ext_panel = Align.center(
-            Group(
-                Align.center(Text("Supported Extensions", style=config_title_style)),
-                Padding(Align.center(ext_table, vertical="top"), (1, 4)),
+        ext_panel = Padding(
+            Align.center(
+                Group(
+                    Align.center(Text("Supported Extensions", style=config_title_style)),
+                    Padding(Align.center(ext_table, vertical="top"), (0, 2)),
+                ),
+                vertical="top",
             ),
-            vertical="top",
+            (0, 0, 1, 0),
         )
 
         #! Logging panel
@@ -76,12 +82,15 @@ class AudioNormalizationCLI:
         log_table.add_row("Log File", f"[white]{LOG_FILE}[/white]")
         log_table.add_row("FFmpeg Debug Log", f"[white]{LOG_FFMPEG_DEBUG}[/white]")
         log_table.add_row("FFmpeg", f"{ffmpeg_status}{ffmpeg_link}")
-        log_panel = Align.center(
-            Group(
-                Align.center(Text("Logging", style=config_title_style)),
-                Padding(Align.center(log_table, vertical="top"), (1, 4)),
+        log_panel = Padding(
+            Align.center(
+                Group(
+                    Align.center(Text("Logging", style=config_title_style)),
+                    Padding(Align.center(log_table, vertical="top"), (0, 2)),
+                ),
+                vertical="top",
             ),
-            vertical="top",
+            (0, 0, 1, 0),
         )
 
         #! Audio output panel
@@ -90,12 +99,15 @@ class AudioNormalizationCLI:
         audio_table.add_column(justify="left", style="white")
         audio_table.add_row("Audio Codec", f"[white]{AUDIO_CODEC}[/white]")
         audio_table.add_row("Audio Bitrate", f"[white]{AUDIO_BITRATE}[/white]")
-        audio_panel = Align.center(
-            Group(
-                Align.center(Text("Audio Output", style=config_title_style)),
-                Padding(Align.center(audio_table, vertical="top"), (1, 4)),
+        audio_panel = Padding(
+            Align.center(
+                Group(
+                    Align.center(Text("Audio Output", style=config_title_style)),
+                    Padding(Align.center(audio_table, vertical="top"), (0, 2)),
+                ),
+                vertical="top",
             ),
-            vertical="top",
+            (0, 0, 1, 0),
         )
 
         #! System info panel
@@ -106,17 +118,20 @@ class AudioNormalizationCLI:
         sys_table.add_column(justify="left", style="white")
         sys_table.add_row("CPU", f"[white]{cpu}[/white]")
         sys_table.add_row("Cores", f"[white]{core_count}[/white]")
-        sys_panel = Align.center(
-            Group(
-                Align.center(Text("System Info", style=config_title_style)),
-                Padding(Align.center(sys_table, vertical="top"), (1, 4)),
+        sys_panel = Padding(
+            Align.center(
+                Group(
+                    Align.center(Text("System Info", style=config_title_style)),
+                    Padding(Align.center(sys_table, vertical="top"), (0, 2)),
+                ),
+                vertical="top",
             ),
-            vertical="top",
+            (0, 0, 1, 0),
         )
 
         config_panels = [sys_panel, norm_panel, audio_panel, log_panel, ext_panel]
         config_group = Align.center(
-            Columns(config_panels, align="center", expand=True, equal=True, width=None, padding=(0, 2)),
+            Columns(config_panels, align="center", expand=True, equal=True, width=None, padding=(0, 1)),
             vertical="top",
         )
 
@@ -145,18 +160,13 @@ class AudioNormalizationCLI:
 
         terminal_cols = shutil.get_terminal_size(fallback=(80, 24)).columns
         menu_width = min(80, max(40, int(terminal_cols * 0.35)))
-        layout = Layout()
-        layout.split_column(
-            Layout(Align.center(title_text), name="title", size=3),
-            Layout(Align.center(subtitle), name="subtitle", size=2),
-            Layout(name="main", ratio=1)
-        )
 
-        layout["main"].split_row(
-            Layout(Align.left(menu_table, vertical="top"), name="menu", size=menu_width),
-            Layout(config_group, name="config")
-        )
-        self.console.print(layout)
+        grid = Table.grid(expand=False)
+        grid.add_column(width=menu_width)
+        grid.add_column(ratio=1)
+        grid.add_row(Align.left(menu_table, vertical="top", width=menu_width), config_group)
+        content_group = Group(Align.center(title_text), Padding(Align.center(subtitle), (0, 0, 2, 0)), grid)
+        self.console.print(content_group)
 
     def _wait_for_resume_or_exit(self):
         """Wait for a single keypress: Enter to resume, Esc to exit."""

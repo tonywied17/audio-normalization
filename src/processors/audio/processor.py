@@ -111,6 +111,8 @@ class AudioProcessor:
             if video_streams:
                 ffmpeg_cmd.extend(["-map", "0:v"])
 
+            ffmpeg_cmd.extend(["-map", "0:s?"])
+
             for i, stream in enumerate(audio_streams):
                 original_title = stream.get('tags', {}).get('title', f'Track {i+1}')
                 new_title = update_track_title(original_title, "Normalized")
@@ -123,6 +125,7 @@ class AudioProcessor:
                 "-c:v", "copy",
                 "-c:a", AUDIO_CODEC,
                 "-b:a", AUDIO_BITRATE,
+                "-c:s", "copy",
                 temp_output
             ])
 
@@ -227,6 +230,8 @@ class AudioProcessor:
             if video_streams:
                 ffmpeg_cmd.extend(["-map", "0:v"]) 
 
+            ffmpeg_cmd.extend(["-map", "0:s?"])
+
             for i, stream in enumerate(audio_streams):
                 original_title = stream.get('tags', {}).get('title', f'Track {i+1}')
                 new_title = update_track_title(original_title, "Boosted", f"{boost_percent}%")
@@ -241,7 +246,7 @@ class AudioProcessor:
                 max_channels = max(max_channels, ch)
             if max_channels <= 0:
                 max_channels = 2
-            ffmpeg_cmd.extend(["-c:v", "copy", "-c:a", AUDIO_CODEC, "-b:a", AUDIO_BITRATE, "-ac", str(max_channels), temp_output])
+            ffmpeg_cmd.extend(["-c:v", "copy", "-c:a", AUDIO_CODEC, "-b:a", AUDIO_BITRATE, "-ac", str(max_channels), "-c:s", "copy", temp_output])
             
             run_success = False
             if show_ui:

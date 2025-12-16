@@ -1,4 +1,4 @@
-# Audio Normalization
+# [molexAudio] Normalization and Boosting Tool
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/tonywied17/audio-normalization?style=for-the-badge)
 ![GitHub language count](https://img.shields.io/github/languages/top/tonywied17/audio-normalization?style=for-the-badge)
@@ -6,8 +6,8 @@
 
 This project is a command-line tool for normalizing and boosting audio tracks in media files. It helps you achieve consistent audio levels across files by analyzing loudness and applying fixes using FFmpeg. It also supports parallel processing to speed up batch operations.
 
-## Windows Executable Releases
-Pre-built Windows executable is available in the [Releases](https://github.com/tonywied17/audio-normalization/releases) section.
+## Windows Releases
+A standalone executable and an optional Windows installer are available on the project's [Releases](https://github.com/tonywied17/audio-normalization/releases) page.
 
 ## Requirements
 
@@ -110,5 +110,39 @@ python audio_tool.py -b "/path/to/directory" 5
 2. **Audio Boost**: The tool can also apply a simple audio boost by increasing the volume of the audio track by a specified percentage. This is useful for making quiet audio tracks louder without performing full normalization.
 3. **Parallel Processing**: The tool supports parallel processing, allowing multiple files to be processed simultaneously. This significantly speeds up the normalization and boosting process when dealing with large batches of files.
 4. **Logging**: Detailed logs of the operations are maintained in the `logs/` directory, including FFmpeg command outputs for troubleshooting.
-5. **Configuration**: Default settings such as target loudness levels and audio codecs can be adjusted in the `src/core/config.py` file.
+5. **Configuration**: Default settings such as target loudness levels and audio codecs can be adjusted in the `config.json` file.
+
+### Configuration via config.json
+
+The application now supports a `config.json` file (created automatically in the project root on first run) which can be used to persist and override default settings. When present, values in `config.json` are merged with the built-in defaults at startup.
+
+Common keys you can set in `config.json`:
+- `NORMALIZATION_PARAMS`: an object with `I`, `TP`, and `LRA` (e.g. integrated loudness, true peak, loudness range).
+- `AUDIO_CODEC`: the default output audio codec (e.g. `ac3`).
+- `AUDIO_BITRATE`: default audio bitrate (e.g. `256k`).
+- `SUPPORTED_EXTENSIONS`: array of file extensions the tool should consider.
+- `LOG_DIR`, `LOG_FILE`, `LOG_FFMPEG_DEBUG`: logging paths and filenames.
+
+Example `config.json` (project root):
+
+```json
+{
+   "NORMALIZATION_PARAMS": {
+      "I": -16.0,
+      "TP": -1.5,
+      "LRA": 11
+   },
+   "AUDIO_CODEC": "ac3",
+   "AUDIO_BITRATE": "256k",
+   "LOG_DIR": "logs",
+   "LOG_FILE": "app.log",
+   "LOG_FFMPEG_DEBUG": "ffmpeg_debug.log"
+}
+```
+
+How to use:
+- Start the tool once to generate a default `config.json` (if missing), or create the file manually in the project root.
+- Edit values and save; restart the tool for changes to take effect.
+
+Note: `config.json` is intended for user-level defaults; command-line arguments (e.g. `--I`, `--TP`, `--LRA`) still override values from the config file at runtime.
 6. **Auto-FFmpeg Setup (Windows/Scoop)**: If FFmpeg is not detected, the interactive menu offers a guided setup flow that installs Scoop (if needed) and then installs FFmpeg, simplifying the installation process for Windows users.
