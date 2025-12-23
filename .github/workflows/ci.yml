@@ -41,7 +41,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          pytest -q --cov=src --cov-report=xml:coverage.xml --cov-report=html:htmlcov
+          pytest -q --junitxml=report.xml --cov=src --cov-report=xml:coverage.xml --cov-report=html:htmlcov
 
       - name: Upload coverage XML
         uses: actions/upload-artifact@v4
@@ -67,3 +67,5 @@ jobs:
         with:
           gist-id: 6b1ae8d34f5a48d54593e829bdc66849
           token: ${{ secrets.GIST_TOKEN }}
+          prefix: molex-audio
+          ref: false
