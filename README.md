@@ -90,6 +90,7 @@ You can use the following arguments when running the tool from the command line:
 3. **Parallel Processing**: The tool supports parallel processing, allowing multiple files to be processed simultaneously. This significantly speeds up the normalization and boosting process when dealing with large batches of files.
 4. **Logging**: Detailed logs of the operations are maintained in the `logs/` directory, including FFmpeg command outputs for troubleshooting.
 5. **Configuration**: Default settings such as target loudness levels and audio codecs can be adjusted in the `config.json` file.
+6. **Auto-FFmpeg Setup (Windows/Scoop)**: If FFmpeg is not detected, the interactive menu offers a guided setup flow that installs Scoop (if needed) and then installs FFmpeg, simplifying the installation process for Windows users.
 
 ### Configuration via config.json
 
@@ -166,4 +167,3 @@ Note: `config.json` is intended for user-level defaults. Runtime precedence is:
 3. Built-in defaults in `src/core/config.py` (lowest precedence)
 
 So command-line arguments (e.g. `--I`, `--TP`, `--LRA`) will override values from the `config.json` file.
-6. **Auto-FFmpeg Setup (Windows/Scoop)**: If FFmpeg is not detected, the interactive menu offers a guided setup flow that installs Scoop (if needed) and then installs FFmpeg, simplifying the installation process for Windows users.
