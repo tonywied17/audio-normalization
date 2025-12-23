@@ -55,13 +55,6 @@ jobs:
           name: coverage-html
           path: htmlcov
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage.xml
-          fail_ci_if_error: false
-
       - name: CI Badges
         uses: GaelGirodon/ci-badges-action@v1.9.0
         with:
