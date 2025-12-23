@@ -5,7 +5,6 @@ from rich.console import Console
 
 
 def test_display_results_basic(tmp_path, monkeypatch):
-    """Display results shows summary and per-file panels."""
     repo_root = Path(__file__).resolve().parents[1]
     src_path = str(repo_root / "src")
     if src_path not in sys.path:

@@ -4,7 +4,6 @@ import subprocess
 
 
 def test_logger_append_and_ffmpeg(tmp_path):
-    """Logger formats and writes logs and ffmpeg entries."""
     repo_root = Path(__file__).resolve().parents[1]
     src_path = str(repo_root / "src")
     if src_path not in sys.path:
@@ -23,7 +22,6 @@ def test_logger_append_and_ffmpeg(tmp_path):
 
 
 def test_run_command_success_and_error(monkeypatch):
-    """run_command handles success and CalledProcessError properly."""
     repo_root = Path(__file__).resolve().parents[1]
     src_path = str(repo_root / "src")
     if src_path not in sys.path:

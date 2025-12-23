@@ -24,7 +24,6 @@ class FakeProc:
 
 
 def test_boost_streaming(monkeypatch, tmp_path):
-    """Boosting pipeline emits progress and completes without error."""
     repo_root = Path(__file__).resolve().parents[1]
     src_path = str(repo_root / "src")
     if src_path not in sys.path:

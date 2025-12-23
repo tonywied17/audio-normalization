@@ -4,7 +4,6 @@ import os
 
 
 def test_update_track_title_and_channels(tmp_path):
-    """Update track title formatting and channel layout conversion."""
     repo_root = Path(__file__).resolve().parents[1]
     src_path = str(repo_root / "src")
     if src_path not in sys.path:
@@ -22,7 +21,6 @@ def test_update_track_title_and_channels(tmp_path):
 
 
 def test_create_temp_file_registers(monkeypatch, tmp_path):
-    """create_temp_file registers temp file with SignalHandler."""
     repo_root = Path(__file__).resolve().parents[1]
     src_path = str(repo_root / "src")
     if src_path not in sys.path:

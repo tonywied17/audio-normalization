@@ -4,7 +4,6 @@ from rich.console import Console
 
 
 def test_display_results_panel_fallback(monkeypatch):
-    """Ensure display_results imports Panel locally if module-level Panel is missing."""
     repo_root = Path(__file__).resolve().parents[1]
     src_path = str(repo_root / "src")
     if src_path not in sys.path:

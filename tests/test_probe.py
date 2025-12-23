@@ -4,7 +4,6 @@ import json
 
 
 def test_get_audio_streams_various(monkeypatch, tmp_path):
-    """Probe returns audio streams under various ffprobe outputs."""
     repo_root = Path(__file__).resolve().parents[1]
     src_path = str(repo_root / "src")
     if src_path not in sys.path:
@@ -55,7 +54,6 @@ def test_get_audio_streams_various(monkeypatch, tmp_path):
 
 
 def test_get_video_streams(monkeypatch, tmp_path):
-    """Probe returns video streams list."""
     repo_root = Path(__file__).resolve().parents[1]
     src_path = str(repo_root / "src")
     if src_path not in sys.path:

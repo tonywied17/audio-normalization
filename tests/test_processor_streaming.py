@@ -25,7 +25,6 @@ class FakeProc:
 
 
 def test_normalize_streaming(tmp_path, monkeypatch):
-    """Normalization pipeline analyzes then encodes, reporting progress."""
     repo_root = Path(__file__).resolve().parents[1]
     src_path = str(repo_root / "src")
     if src_path not in sys.path:

@@ -21,7 +21,6 @@ def test_normalize_and_boost_preserve_subtitles(tmp_path, monkeypatch):
     captured = {"cmds": []}
 
     def fake_run_command(cmd, capture_output=False):
-        """Fake run_command to capture ffmpeg commands."""
         captured["cmds"].append(cmd)
         class R:
             returncode = 0
@@ -29,7 +28,6 @@ def test_normalize_and_boost_preserve_subtitles(tmp_path, monkeypatch):
         return R()
 
     def fake_popen(cmd):
-        """Fake popen to capture ffmpeg commands."""
         captured["cmds"].append(cmd)
         proc = MagicMock()
         proc.stderr = []
