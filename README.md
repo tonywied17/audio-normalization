@@ -1,6 +1,7 @@
 # [molexAudio] Normalization and Boosting Tool
 
 ![Tests](https://img.shields.io/github/actions/workflow/status/tonywied17/audio-normalization/ci.yml?branch=main&label=tests&style=for-the-badge)
+[![codecov](https://codecov.io/github/tonywied17/molex-audio/branch/main/graph/badge.svg?token=B65EIQRICI)](https://codecov.io/github/tonywied17/molex-audio)
 ![GitHub repo size](https://img.shields.io/github/repo-size/tonywied17/audio-normalization?style=for-the-badge)
 ![GitHub language count](https://img.shields.io/github/languages/top/tonywied17/audio-normalization?style=for-the-badge)
 ![GitHub last commit](https://img.shields.io/github/last-commit/tonywied17/audio-normalization?style=for-the-badge)
