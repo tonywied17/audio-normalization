@@ -9,7 +9,7 @@ import sys
 from rich.console import Console, Group
 from rich.table import Table
 from rich import box
-from core.config import NORMALIZATION_PARAMS, AUDIO_CODEC, AUDIO_BITRATE, SUPPORTED_EXTENSIONS, LOG_DIR, LOG_FILE, LOG_FFMPEG_DEBUG, VERSION
+from core.config import NORMALIZATION_PARAMS, AUDIO_CODEC, FALLBACK_AUDIO_CODEC, AUDIO_BITRATE, SUPPORTED_EXTENSIONS, LOG_DIR, LOG_FILE, LOG_FFMPEG_DEBUG, VERSION
 from rich.padding import Padding
 from rich.align import Align
 from rich.layout import Layout
@@ -98,6 +98,7 @@ class AudioNormalizationCLI:
         audio_table.add_column(justify="right", style="bold grey50")
         audio_table.add_column(justify="left", style="white")
         audio_table.add_row("Audio Codec", f"[white]{AUDIO_CODEC}[/white]")
+        audio_table.add_row("Fallback Audio Codec", f"[white]{FALLBACK_AUDIO_CODEC}[/white]")
         audio_table.add_row("Audio Bitrate", f"[white]{AUDIO_BITRATE}[/white]")
         audio_panel = Padding(
             Align.center(

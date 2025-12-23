@@ -18,9 +18,6 @@ Or run as a module (recommended):
     python -m audio_tool
 """
 
-from cli import parse_args, AudioNormalizationCLI, CommandHandler
-from core.signal_handler import SignalHandler
-from core.config import NORMALIZATION_PARAMS
 import os
 import sys
 import ctypes
@@ -85,6 +82,10 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.join(PROJECT_ROOT, "src")
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
+
+from cli import parse_args, AudioNormalizationCLI, CommandHandler
+from core.signal_handler import SignalHandler
+from core.config import NORMALIZATION_PARAMS
 
 def run_interactive(cli: AudioNormalizationCLI, handler: CommandHandler, signal_handler: SignalHandler, debug: bool = False):
     """Run the interactive CLI loop."""
@@ -167,6 +168,8 @@ def main():
         run_interactive(cli, handler, signal_handler, debug=getattr(args, 'debug_no_ffmpeg', False) if args else False)
     else:
         if getattr(args, 'normalize', None):
+            # Apply command-line overrides to normalization params.
+            # Precedence: CLI args > config.json > built-in defaults.
             if args.I is not None:
                 NORMALIZATION_PARAMS['I'] = args.I
             if args.TP is not None:

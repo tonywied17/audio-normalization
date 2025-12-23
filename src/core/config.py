@@ -21,7 +21,21 @@ SUPPORTED_EXTENSIONS = (
     '.mpg', '.mpeg', '.mp3', '.wav', '.flac', '.ogg', '.m4a', '.wma', '.aac'
 )
 
-AUDIO_CODEC = "ac3"
+# Preferred audio codec for re-encoding normalized tracks.
+# Valid examples and recommendations:
+# - "ac3": Widely-compatible (Plex, many TVs/receivers). Good default for broad device support.
+# - "aac": Common for MP4/M4V files and streaming; good quality at moderate bitrates.
+# - "opus": Excellent quality for low bitrate, used mainly in WebM/OGG containers.
+# - "flac": Lossless; use when preserving original quality is required (larger files).
+# - "dts" / "eac3": Multi-channel passthrough/consumer surround formats; often preserved when you
+#    want bitstreaming to receivers, but re-encoding to these may not be desirable.
+# - "pcm_s16le": Uncompressed PCM; high fidelity but very large files.
+# - "inherit": Special value (default) — re-encode each audio stream using its original codec as
+#    reported by ffprobe (`codec_name`). If the original codec cannot be determined or is
+#    unsupported for re-encoding into the container, `FALLBACK_AUDIO_CODEC` will be used.
+AUDIO_CODEC = "inherit"
+FALLBACK_AUDIO_CODEC = "ac3"
+
 AUDIO_BITRATE = "256k"
 
 LOG_DIR = "logs/"
@@ -51,6 +65,7 @@ def _write_default_config(path: str) -> None:
         "SUPPORTED_EXTENSIONS": list(SUPPORTED_EXTENSIONS),
         "AUDIO_CODEC": AUDIO_CODEC,
         "AUDIO_BITRATE": AUDIO_BITRATE,
+        "FALLBACK_AUDIO_CODEC": FALLBACK_AUDIO_CODEC,
         "LOG_DIR": LOG_DIR,
         "LOG_FILE": LOG_FILE,
         "LOG_FFMPEG_DEBUG": LOG_FFMPEG_DEBUG,
@@ -97,6 +112,8 @@ def _load_json_config():
         AUDIO_CODEC = data.get("AUDIO_CODEC")
     if isinstance(data.get("AUDIO_BITRATE"), str):
         AUDIO_BITRATE = data.get("AUDIO_BITRATE")
+    if isinstance(data.get("FALLBACK_AUDIO_CODEC"), str):
+        FALLBACK_AUDIO_CODEC = data.get("FALLBACK_AUDIO_CODEC")
 
     if isinstance(data.get("LOG_DIR"), str):
         LOG_DIR = data.get("LOG_DIR")

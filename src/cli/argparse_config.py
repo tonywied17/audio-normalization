@@ -40,19 +40,19 @@ def parse_args():
         "--I",
         type=float,
         default=None,
-        help="Integrated loudness target (LUFS)"
+        help="Integrated loudness target (LUFS). Overrides value from config.json if provided."
     )
     parser.add_argument(
         "--TP",
         type=float,
         default=None,
-        help="True peak target (dBFS)"
+        help="True peak target (dBFS). Overrides value from config.json if provided."
     )
     parser.add_argument(
         "--LRA",
         type=float,
         default=None,
-        help="Loudness range target (LU)"
+        help="Loudness range target (LU). Overrides value from config.json if provided."
     )
 
     parser.add_argument(

@@ -6,7 +6,7 @@ import os
 import re
 import json
 from typing import Optional, List, Dict, Any
-from core.config import NORMALIZATION_PARAMS, AUDIO_CODEC, AUDIO_BITRATE
+from core.config import NORMALIZATION_PARAMS, AUDIO_CODEC, AUDIO_BITRATE, FALLBACK_AUDIO_CODEC
 from core.logger import Logger
 from core.signal_handler import SignalHandler
 from .runner import run_command, popen
@@ -118,16 +118,25 @@ class AudioProcessor:
                 new_title = update_track_title(original_title, "Normalized")
                 ffmpeg_cmd.extend([
                     "-map", f"[a{i}]",
-                    f"-metadata:s:a:{i}", f"title={new_title}"
+                    f"-metadata:s:a:{i}", f"title={new_title}",
+                    f"-metadata:s:a:{i}", f"handler_name={new_title}"
                 ])
 
-            ffmpeg_cmd.extend([
-                "-c:v", "copy",
-                "-c:a", AUDIO_CODEC,
-                "-b:a", AUDIO_BITRATE,
-                "-c:s", "copy",
-                temp_output
-            ])
+            # If AUDIO_CODEC == "inherit", select per-stream codecs based on probe results
+            if AUDIO_CODEC == "inherit":
+                ffmpeg_cmd.extend(["-c:v", "copy"])
+                for i, s in enumerate(audio_streams):
+                    codec = s.get('codec_name') or FALLBACK_AUDIO_CODEC
+                    ffmpeg_cmd.extend([f"-c:a:{i}", codec, f"-b:a:{i}", AUDIO_BITRATE])
+                ffmpeg_cmd.extend(["-c:s", "copy", temp_output])
+            else:
+                ffmpeg_cmd.extend([
+                    "-c:v", "copy",
+                    "-c:a", AUDIO_CODEC,
+                    "-b:a", AUDIO_BITRATE,
+                    "-c:s", "copy",
+                    temp_output
+                ])
 
             if progress_callback:
                 try:
@@ -236,7 +245,7 @@ class AudioProcessor:
                 original_title = stream.get('tags', {}).get('title', f'Track {i+1}')
                 new_title = update_track_title(original_title, "Boosted", f"{boost_percent}%")
                 ffmpeg_cmd.extend(["-map", f"[a{i}]"])
-                ffmpeg_cmd.extend([f"-metadata:s:a:{i}", f"title={new_title}"])
+                ffmpeg_cmd.extend([f"-metadata:s:a:{i}", f"title={new_title}", f"-metadata:s:a:{i}", f"handler_name={new_title}"])
             max_channels = 0
             for s in audio_streams:
                 try:
@@ -246,7 +255,15 @@ class AudioProcessor:
                 max_channels = max(max_channels, ch)
             if max_channels <= 0:
                 max_channels = 2
-            ffmpeg_cmd.extend(["-c:v", "copy", "-c:a", AUDIO_CODEC, "-b:a", AUDIO_BITRATE, "-ac", str(max_channels), "-c:s", "copy", temp_output])
+            # Per-stream codec selection when inheriting original codec
+            if AUDIO_CODEC == "inherit":
+                ffmpeg_cmd.extend(["-c:v", "copy", "-ac", str(max_channels)])
+                for i, s in enumerate(audio_streams):
+                    codec = s.get('codec_name') or FALLBACK_AUDIO_CODEC
+                    ffmpeg_cmd.extend([f"-c:a:{i}", codec, f"-b:a:{i}", AUDIO_BITRATE])
+                ffmpeg_cmd.extend(["-c:s", "copy", temp_output])
+            else:
+                ffmpeg_cmd.extend(["-c:v", "copy", "-c:a", AUDIO_CODEC, "-b:a", AUDIO_BITRATE, "-ac", str(max_channels), "-c:s", "copy", temp_output])
             
             run_success = False
             if show_ui:

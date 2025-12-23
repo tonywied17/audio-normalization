@@ -1,5 +1,6 @@
 # [molexAudio] Normalization and Boosting Tool
 
+![Tests](https://img.shields.io/github/actions/workflow/status/tonywied17/audio-normalization/ci.yml?branch=main&label=tests&style=for-the-badge)
 ![GitHub repo size](https://img.shields.io/github/repo-size/tonywied17/audio-normalization?style=for-the-badge)
 ![GitHub language count](https://img.shields.io/github/languages/top/tonywied17/audio-normalization?style=for-the-badge)
 ![GitHub last commit](https://img.shields.io/github/last-commit/tonywied17/audio-normalization?style=for-the-badge)
@@ -82,28 +83,6 @@ You can use the following arguments when running the tool from the command line:
  - `--workers`: Set maximum parallel worker threads for batch processing. Defaults to auto-detected CPU count.
  - `--debug-no-ffmpeg`: Debug flag to simulate missing FFmpeg and exercise the setup flow.
 
-### Examples
-
-#### Normalize a Single File with Default Parameters:
-```bash
-python audio_tool.py -n "/path/to/file.mkv"
-```
-
-#### Normalize a Directory with Custom Parameters:
-```bash
-python audio_tool.py -n "/path/to/directory" --I -18 --TP -2 --LRA 9
-```
-
-#### Apply Audio Boost to a File:
-```bash
-python audio_tool.py -b "/path/to/file.mkv" 10
-```
-
-#### Apply Audio Boost to All Files in a Directory:
-```bash
-python audio_tool.py -b "/path/to/directory" 5
-```
-
 ## How It Works
 
 1. **Normalization**: The tool analyzes the audio track of the specified media file(s) to determine the current loudness levels. It then calculates the necessary adjustments to bring the audio to the target levels defined by the user (or defaults). The tool uses FFmpeg to apply these adjustments and create a new normalized audio track.
@@ -127,22 +106,64 @@ Example `config.json` (project root):
 
 ```json
 {
-   "NORMALIZATION_PARAMS": {
-      "I": -16.0,
-      "TP": -1.5,
-      "LRA": 11
-   },
-   "AUDIO_CODEC": "ac3",
-   "AUDIO_BITRATE": "256k",
-   "LOG_DIR": "logs",
-   "LOG_FILE": "app.log",
-   "LOG_FFMPEG_DEBUG": "ffmpeg_debug.log"
+  "VERSION": "2.2",
+  "NORMALIZATION_PARAMS": {
+    "I": -16.0,
+    "TP": -1.5,
+    "LRA": 11.0
+  },
+  "SUPPORTED_EXTENSIONS": [
+    ".mp4",
+    ".mkv",
+    ".avi",
+    ".mov",
+    ".flv",
+    ".wmv",
+    ".webm",
+    ".m4v",
+    ".mpg",
+    ".mpeg",
+    ".mp3",
+    ".wav",
+    ".flac",
+    ".ogg",
+    ".m4a",
+    ".wma",
+    ".aac"
+  ],
+  "AUDIO_CODEC": "inherit",
+  "AUDIO_BITRATE": "256k",
+  "FALLBACK_AUDIO_CODEC": "ac3",
+  "LOG_DIR": "logs/",
+  "LOG_FILE": "app.log",
+  "LOG_FFMPEG_DEBUG": "ffmpeg_debug.log",
+  "TEMP_SUFFIX": "_temp_processing"
 }
 ```
+
+## Audio codec options
+
+When the tool re-encodes audio it uses the codec specified in `AUDIO_CODEC` (or `inherit`). Common values and when to use them:
+
+- `ac3`: Broadly compatible (Plex, many TVs/receivers). Good default for device compatibility.
+- `aac`: Common inside MP4/M4V containers and streaming; good quality at moderate bitrates.
+- `opus`: High quality at low bitrates; typically used in WebM/OGG.
+- `flac`: Lossless; use when you want to preserve original quality (large files).
+- `dts`, `eac3`: Consumer surround formats; usually preserved for passthrough to receivers rather than re-encoding.
+- `pcm_s16le`: Uncompressed PCM — highest fidelity but very large files.
+- `inherit`: Special value (the default). Re-encode each audio stream using the original codec reported by `ffprobe` (`codec_name`). If the original codec cannot be determined or is unsupported for the target container, the `FALLBACK_AUDIO_CODEC` setting (in `config.json`) will be used instead.
+
+Tradeoffs: choosing a fixed codec like `ac3` gives predictable compatibility but changes the original codec (and may alter filesize/quality). `inherit` aims to preserve the original codec per-stream while still applying normalization.
 
 How to use:
 - Start the tool once to generate a default `config.json` (if missing), or create the file manually in the project root.
 - Edit values and save; restart the tool for changes to take effect.
 
-Note: `config.json` is intended for user-level defaults; command-line arguments (e.g. `--I`, `--TP`, `--LRA`) still override values from the config file at runtime.
+Note: `config.json` is intended for user-level defaults. Runtime precedence is:
+
+1. Command-line arguments (highest precedence)
+2. `config.json` values
+3. Built-in defaults in `src/core/config.py` (lowest precedence)
+
+So command-line arguments (e.g. `--I`, `--TP`, `--LRA`) will override values from the `config.json` file.
 6. **Auto-FFmpeg Setup (Windows/Scoop)**: If FFmpeg is not detected, the interactive menu offers a guided setup flow that installs Scoop (if needed) and then installs FFmpeg, simplifying the installation process for Windows users.
