@@ -156,6 +156,10 @@ When the tool re-encodes audio it uses the codec specified in `AUDIO_CODEC` (or 
 Tradeoffs: choosing a fixed codec like `ac3` gives predictable compatibility but changes the original codec (and may alter filesize/quality). `inherit` aims to preserve the original codec per-stream while still applying normalization.
 
 How to use:
+
+![Codecov](https://img.shields.io/codecov/c/github/tonywied17/audio-normalization?style=for-the-badge)
+
+CI now uploads a per-run HTML coverage report as a workflow artifact named `coverage-html` and pushes the coverage report to Codecov (public repos only). To download the HTML report from a workflow run: Actions → select run → Artifacts → download `coverage-html`.
 - Start the tool once to generate a default `config.json` (if missing), or create the file manually in the project root.
 - Edit values and save; restart the tool for changes to take effect.
 

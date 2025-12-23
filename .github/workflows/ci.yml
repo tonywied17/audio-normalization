@@ -37,8 +37,26 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           # Ensure pytest is available for the test run (not listed in requirements.txt)
-          python -m pip install pytest
+          python -m pip install pytest pytest-cov coverage
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
-          pytest -q
+          pytest -q --cov=src --cov-report=xml:coverage.xml --cov-report=html:htmlcov
+
+      - name: Upload coverage XML
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+
+      - name: Upload coverage HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: htmlcov
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
