@@ -43,7 +43,7 @@ Choose the "Setup FFmpeg" option from the menu to run the guided installer.
 
 ## Alternative Installation Method (Using Scoop)
 
-For an easier installation with automatic environment variable setup, you can use [Scoop](https://scoop.sh/). For detailed instructions, see the [Scoop Installation Guide](/readme/scoop_installation_guide.md).
+For an easier installation with automatic environment variable setup, you can use [Scoop](https://scoop.sh/). For detailed instructions, see the [Scoop Installation Guide](/.github/readme/scoop_installation_guide.md).
 
 
 ## Usage
@@ -62,7 +62,7 @@ python audio_tool.py
 
 
 #### CLI Screenshot
-![Audio Tool 2.2](https://github.com/tonywied17/audio-normalization/blob/main/readme/audio-tool-menu.gif?raw=true)
+![Audio Tool 2.2](https://github.com/tonywied17/audio-normalization/blob/main/.github/readme/audio-tool-menu.gif?raw=true)
 
 ### Command-Line Arguments
 
