@@ -61,3 +61,9 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
           fail_ci_if_error: false
+
+      - name: CI Badges
+        uses: GaelGirodon/ci-badges-action@v1.9.0
+        with:
+          gist-id: 6b1ae8d34f5a48d54593e829bdc66849
+          token: ${{ secrets.GIST_TOKEN }}
