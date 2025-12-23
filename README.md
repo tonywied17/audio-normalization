@@ -1,8 +1,8 @@
 # [molexAudio] Normalization and Boosting Tool
 [![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/tonywied17/6b1ae8d34f5a48d54593e829bdc66849/raw/molex-audio-cobertura-coverage.json&style=for-the-badge)](https://gist.github.com/tonywied17/6b1ae8d34f5a48d54593e829bdc66849)
 [![tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/tonywied17/6b1ae8d34f5a48d54593e829bdc66849/raw/molex-audio-junit-tests.json&style=for-the-badge)](https://gist.github.com/tonywied17/6b1ae8d34f5a48d54593e829bdc66849)
+![Tests (workflow)](https://img.shields.io/github/actions/workflow/status/tonywied17/audio-normalization/ci.yml?branch=main&label=all%20tests&style=for-the-badge)
 <br>
-![Tests (workflow)](https://img.shields.io/github/actions/workflow/status/tonywied17/audio-normalization/ci.yml?branch=main&label=workflow%20tests&style=for-the-badge)
 ![GitHub repo size](https://img.shields.io/github/repo-size/tonywied17/audio-normalization?style=for-the-badge)
 ![GitHub language count](https://img.shields.io/github/languages/top/tonywied17/audio-normalization?style=for-the-badge)
 ![GitHub last commit](https://img.shields.io/github/last-commit/tonywied17/audio-normalization?style=for-the-badge)
