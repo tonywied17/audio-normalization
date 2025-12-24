@@ -83,3 +83,28 @@ def test_load_json_config_applies_overrides(monkeypatch, tmp_path):
     assert conf.NORMALIZATION_PARAMS.get('I') == -20.0
     assert conf.SUPPORTED_EXTENSIONS == tuple(['.foo'])
     assert conf.AUDIO_CODEC == 'aac'
+
+
+def test_get_config_path_when_frozen(monkeypatch, tmp_path):
+    # simulate a frozen executable location
+    import sys as _sys
+    fake_exe = str(tmp_path / 'app.exe')
+    monkeypatch.setattr(_sys, 'frozen', True, raising=False)
+    monkeypatch.setattr(_sys, 'executable', fake_exe, raising=False)
+    conf = reload_conf()
+    p = conf._get_config_path()
+    import os
+    assert p == os.path.join(os.path.dirname(fake_exe), 'config.json')
+
+
+def test_load_json_config_handles_bad_param_values(monkeypatch, tmp_path):
+    conf = reload_conf()
+    target = tmp_path / 'badparam.json'
+    payload = {
+        'NORMALIZATION_PARAMS': {'I': 'not-a-number'}
+    }
+    target.write_text(json.dumps(payload), encoding='utf-8')
+    monkeypatch.setattr(conf, '_get_config_path', lambda: str(target))
+    # reload should not raise and should leave the default numeric value in place
+    conf._load_json_config()
+    assert isinstance(conf.NORMALIZATION_PARAMS.get('I'), float)

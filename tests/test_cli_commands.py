@@ -103,3 +103,54 @@ def test_setup_ffmpeg_success_failure_and_exception(monkeypatch, tmp_path):
     res3 = handler.setup_ffmpeg()
     assert any(not r['success'] for r in res3)
     assert any('Exception running setup step' in m for m in logs2)
+
+
+def test_process_file_unknown_operation_logs_and_returns_false(monkeypatch):
+    handler = CommandHandler(max_workers=1)
+    called = {}
+    monkeypatch.setattr(handler.logger, 'error', lambda m: called.setdefault('err', m))
+    res = handler.process_file('x.mp4', 'unknown_op')
+    assert res is False
+    assert 'Failed to process' in called.get('err', '')
+
+
+def test_handle_normalize_directory_file_and_invalid(monkeypatch, tmp_path):
+    handler = CommandHandler(max_workers=1)
+
+    # directory path case
+    d = tmp_path / 'dd'
+    d.mkdir()
+    monkeypatch.setattr(os.path, 'isdir', lambda p: True)
+    monkeypatch.setattr(os.path, 'isfile', lambda p: False)
+    monkeypatch.setattr(handler.batch_processor, 'process_directory', lambda p, dry_run=False, max_workers=None: [{'file': p, 'status': 'Success'}])
+    out = handler.handle_normalize(str(d), dry_run=True, max_workers=1)
+    assert isinstance(out, list) and out[0]['status'] == 'Success'
+
+    # file path case
+    f = tmp_path / 'f.mp4'
+    f.write_text('x')
+    monkeypatch.setattr(os.path, 'isdir', lambda p: False)
+    monkeypatch.setattr(os.path, 'isfile', lambda p: True)
+    monkeypatch.setattr(handler.batch_processor, 'process_single_file_with_progress', lambda p, dry_run=False: {'file': p, 'status': 'Success'})
+    out2 = handler.handle_normalize(str(f), dry_run=False)
+    assert isinstance(out2, list) and out2[0]['status'] == 'Success'
+
+    # invalid path
+    monkeypatch.setattr(os.path, 'isdir', lambda p: False)
+    monkeypatch.setattr(os.path, 'isfile', lambda p: False)
+    logs = {}
+    monkeypatch.setattr(handler.logger, 'error', lambda m: logs.setdefault('msg', m))
+    out3 = handler.handle_normalize('nope', dry_run=False)
+    assert out3 == []
+    assert 'Invalid path provided' in logs.get('msg', '')
+
+
+def test_handle_boost_invalid_path_logs_and_returns_empty(monkeypatch):
+    handler = CommandHandler(max_workers=1)
+    monkeypatch.setattr(os.path, 'isdir', lambda p: False)
+    monkeypatch.setattr(os.path, 'isfile', lambda p: False)
+    logs = {}
+    monkeypatch.setattr(handler.logger, 'error', lambda m: logs.setdefault('msg', m))
+    res = handler.handle_boost('nope', '5')
+    assert res == []
+    assert 'Invalid file or directory path' in logs.get('msg', '')

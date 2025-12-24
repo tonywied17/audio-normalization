@@ -53,6 +53,64 @@ def test_get_audio_streams_various(monkeypatch, tmp_path):
     assert s4 == []
 
 
+def test_get_audio_streams_fallback_raises(monkeypatch, tmp_path):
+    repo_root = Path(__file__).resolve().parents[1]
+    src_path = str(repo_root / "src")
+    if src_path not in sys.path:
+        sys.path.insert(0, src_path)
+
+    from processors.audio import probe
+    from core.logger import Logger
+
+    logger = Logger()
+    media = str(tmp_path / "m2.mp4")
+
+    class R:
+        def __init__(self, stdout):
+            self.stdout = stdout
+
+    # initial ffprobe returns empty streams, fallback raises
+    def run_cmd(cmd):
+        cmd_str = ' '.join(cmd) if isinstance(cmd, (list, tuple)) else str(cmd)
+        if '-show_streams' in cmd_str:
+            return R(json.dumps({}))
+        # fallback invocation
+        raise RuntimeError('fallback fail')
+
+    monkeypatch.setattr(probe, 'run_command', run_cmd)
+    s = probe.get_audio_streams(media, logger)
+    assert s == []
+
+
+def test_get_audio_streams_probe_count_raises(monkeypatch, tmp_path):
+    repo_root = Path(__file__).resolve().parents[1]
+    src_path = str(repo_root / "src")
+    if src_path not in sys.path:
+        sys.path.insert(0, src_path)
+
+    from processors.audio import probe
+    from core.logger import Logger
+
+    logger = Logger()
+    media = str(tmp_path / "m3.mp4")
+
+    class R:
+        def __init__(self, stdout):
+            self.stdout = stdout
+
+    def run_cmd2(cmd):
+        cmd_str = ' '.join(cmd) if isinstance(cmd, (list, tuple)) else str(cmd)
+        if '-show_streams' in cmd_str:
+            return R(json.dumps({}))
+        if 'csv=p=0' in cmd_str:
+            raise RuntimeError('probe count fail')
+        return R(json.dumps({}))
+
+    monkeypatch.setattr(probe, 'run_command', run_cmd2)
+    s = probe.get_audio_streams(media, logger)
+    assert s == []
+
+
 def test_get_video_streams(monkeypatch, tmp_path):
     repo_root = Path(__file__).resolve().parents[1]
     src_path = str(repo_root / "src")

@@ -101,6 +101,26 @@ def test_update_panel_info_panel_exception(monkeypatch):
     upd("analyzing")
     # calling with info_panel that triggers the sentinel should be caught and not raise
     upd("analyzing", info_panel=sentinel)
+
+
+def test_update_panel_boost_live_exception(monkeypatch):
+    sp = Spinner("dots", "init")
+    panels = [None]
+    spinners = [sp]
+
+    class LiveErr:
+        def update(self, grp):
+            raise RuntimeError("ui fail")
+
+    live_ref = {"live": LiveErr()}
+    upd = ui_mod.make_update_panel(0, spinners, panels, live_ref, "b.mp4", boost_percent=10.0, audio_tracks=1)
+
+    # boosting with live.update raising should be caught and not propagate
+    upd("boosting", last_line="x", error=False)
+    # finalizing and success should also swallow live.update errors
+    upd("finalizing")
+    upd("success")
+    assert isinstance(panels[0], Panel)
 import sys
 from pathlib import Path
 from rich.spinner import Spinner

@@ -39,3 +39,29 @@ def test_create_temp_file_registers(monkeypatch, tmp_path):
             SignalHandler.unregister_temp_file(temp)
         except Exception:
             pass
+
+
+def test_create_temp_file_handles_register_exception(monkeypatch, tmp_path):
+    repo_root = Path(__file__).resolve().parents[1]
+    src_path = str(repo_root / "src")
+    if src_path not in sys.path:
+        sys.path.insert(0, src_path)
+
+    from processors.audio.utils import create_temp_file
+    import processors.audio.utils as utils_mod
+    from core.config import TEMP_SUFFIX
+
+    orig = str(tmp_path / "video.mp4")
+    # make the SignalHandler.register_temp_file raise when called
+    def bad_register(path):
+        raise Exception("register failed")
+
+    monkeypatch.setattr(utils_mod.SignalHandler, 'register_temp_file', bad_register)
+
+    # Should not raise despite register_temp_file raising
+    temp = create_temp_file(orig)
+    base, ext = os.path.splitext(orig)
+    assert temp.startswith(base)
+    assert ext == ".mp4"
+    assert temp.endswith(ext)
+    assert temp != orig
